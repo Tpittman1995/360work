@@ -233,11 +233,11 @@ main(int argc, char *argv[ ])
    	{
     // Send ENTIRE line to server
     n = write(server_sock, line, MAX);
-    printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
+    printf("%s\n", n, line);
 
     // Read a line from sock and show it
     n = read(server_sock, ans, MAX);
-    printf("client: read  n=%d bytes; echo=(%s)\n",n, ans);
+    printf("%s\n",n, ans);
 	}
   }
 }
