@@ -2,8 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
+
 #include <sys/socket.h>
 #include <netdb.h>
 
@@ -15,8 +14,8 @@ struct sockaddr_in  server_addr;
 
 int server_sock, r;
 int SERVER_IP, SERVER_PORT; 
-char * stringList[8] = {"lcat", "lls", "lcd", "lpwd", "lmkdir", "lrmdir", "lrm", 0};
-char cwd[1024];
+
+
 // clinet initialization code
 
 int client_init(char *argv[])
@@ -62,112 +61,9 @@ int client_init(char *argv[])
   printf("========= init done ==========\n");
 }
 
-int findIndex(char line[MAX])
-{
-	int i = 0;
-	for(i = 0; i < 7; i++)
-	{
-		if(!strcmp(line, stringList[i]))
-		{
-			return i;
-		}
-
-	}
-
-	return -1;
-}
-
-
-
-void lcat(char command[MAX], char pathname[MAX])
-{
-	int fd;
-	int n = 0;
-	char buffer[1024];
-	int l = 0;
-
-if(fd = open(pathname, O_RDONLY))
-{
-
-    while (n = read(fd, buffer, 1024))
-    {
-        for(l = 0; l < n; l++)
-        {
-            printf("%c",(buffer[l]));
-            if(buffer[l] == '\n')
-            {
-      	      printf("\n");
-            }
-        }
-	}
-}
-
-
-}
-   			
-
-void lls(char command[MAX], char pathname[MAX])
-{
-	
-}
-
-
-void lcd(char command[MAX], char pathname[MAX])
-{
-	chdir(pathname);
-	/*
-	getcwd(cwd, 1024);
-	if(pathname[0] == '/')
-	{
-		if(chdir(pathname){
-			printf("cd failed");
-		}
-		return;
-	}
-	//printf("under construction");
-	strcat(cwd, pathname)
-	if(chdir(cwd))
-	{
-		printf("cd failed");
-
-	}
-	*/
-}
-
-void lpwd(char command[MAX], char pathname[MAX])
-{
-	getcwd(cwd, 1024);
-	printf("%s \n", cwd);
-}
-
-void lmkdir(char command[MAX], char pathname[MAX])
-{
-	r = mkdir(pathname, 0755);
-  //  r = mkdir(entry[2].value, 0755);
-
-}
-
-void lrmdir(char command[MAX], char pathname[MAX])
-{
-	 r = rmdir(pathname);
-   //  r = rmdir(entry[2].value);
-
-}
-
-void lrm(char command[MAX], char pathname[MAX])
-{
-	r = unlink(pathname);
-   // r = unlink(entry[2].value);
-}
-
 main(int argc, char *argv[ ])
 {
   int n;
-  char command[MAX];
-  char pathname[MAX];
-  pathname[0] = '\0';
-  command[0] = '\0';
-  
   char line[MAX], ans[MAX];
 
   if (argc < 3){
@@ -187,50 +83,6 @@ main(int argc, char *argv[ ])
     if (line[0]==0)                  // exit if NULL line
        exit(0);
 
-   	if(line[0] == 'l' && line[1] != 's')
-   	{
-   		sscanf(line, "%s %s", command, pathname);
-   		n = findIndex(command);
-   		switch(n)
-   		{
-   			case 0: //lcat
-   			lcat(command, pathname);
-   			break;
-
-   			case 1: //lls
-   			lls(command, pathname);
-
-   			break;
-
-   			case 2: // lcd
-   			lcd(command, pathname);
-   			break;
-
-   			case 3: //lpwd
-   			lpwd(command, pathname);
-   			break;
-
-   			case 4: //lmkdir
-   			lmkdir(command, pathname);
-   			break;
-
-   			case 5: //lrmdir
-   			lrmdir(command, pathname);
-   			break;
-
-   			case 6: // lrm
-   			lrm(command, pathname);
-   			break;
-
-   			default:
-   			printf("Invalid Command\n");
-   			break;
-   			
-
-   		}
-   	}
-   	else
-   	{
     // Send ENTIRE line to server
     n = write(server_sock, line, MAX);
     printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
@@ -238,7 +90,6 @@ main(int argc, char *argv[ ])
     // Read a line from sock and show it
     n = read(server_sock, ans, MAX);
     printf("client: read  n=%d bytes; echo=(%s)\n",n, ans);
-	}
   }
 }
 
