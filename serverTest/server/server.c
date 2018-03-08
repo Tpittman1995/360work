@@ -6,6 +6,18 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <string.h>
+#include <sys/stat.h>
+#define _POSIX_SOURCE
+#include <dirent.h>
+#include <errno.h>
+#include <sys/types.h>
+#undef _POSIX_SOURCE
+#include <stdio.h>
+
 #define  MAX 256
 
 // Define variables:
@@ -73,13 +85,40 @@ int server_init(char *name)
    printf("===================== init done =======================\n");
 }
 
+void myLs(char* pathname){
+  DIR *dir;
+  struct dirent *entry;
+  char cwd[128];
+
+  
+
+ 
+
+  if ((dir = opendir(pathname)) == NULL)
+    perror("opendir() error");
+  else {
+    while ((entry = readdir(dir)) != NULL)
+      printf("%s ", entry->d_name);
+  printf("\n");
+    closedir(dir);
+  }
+}
 
 main(int argc, char *argv[])
 {
+	int temp=0;
+	char *s;
+	char *tempArray[50];
    char *hostname;
    char line[MAX];
-   char *s;
-   int temp;
+   char cwd[128];
+
+   printf("HELLo\n");
+
+   for(temp;temp<50;temp++) tempArray[temp] = malloc(150);
+   printf("HELLo\n");
+
+   	temp=0;
 
    if (argc < 2)
       hostname = "localhost";
@@ -113,23 +152,83 @@ main(int argc, char *argv[])
            close(client_sock);
            break;
       }
+
+
+      getcwd(cwd, 128);
       
       // show the line string
       printf("server: read  n=%d bytes; line=[%s]\n", n, line);
 
-      strcat(line, " ECHO");
+      temp=0;
+      s=strtok(line," ");
+      strcpy(tempArray[temp], s);
+      temp++;
 
-      temp = 0;
-      s = strtok(line, " ");
-      temp = atoi(s);
-      s = strtok(0, " ");
-      temp += atoi(s);
-      sprintf(line, "Total: %d", temp);
+
+      while(s=strtok(0," ")){ 
+      	strcpy(tempArray[temp], s);
+      	temp++;
+      }
+
+      
+
+     printf("%s\n", tempArray[1]);
+ 	 if (!strcmp("ls", tempArray[0])) {
+ 	 	if(tempArray[1]!='\0'){
+ 	 		myLs(tempArray[1]);
+ 	 	}else{
+ 	 		printf("HELLOW WORLD foo\n");
+ 	 		printf("%s\n", tempArray[1]);
+ 	 		myLs(cwd);
+ 	 	}
+ 	 }
+
+ 	 if (!strcmp("pwd", tempArray[0])) {
+ 	 	getcwd(cwd, 128);
+ 	 	printf("%s\n", cwd);
+ 	 	sprintf(line,"%s", cwd);
+ 	 	}
+
+ 	 if (!strcmp("cd", tempArray[0])) {
+ 	 		chdir(tempArray[1]);
+ 	 	}
+
+ 	 if (!strcmp("rm", tempArray[0])) {
+ 	 		unlink(tempArray[1]);
+ 	 	}
+
+ 	 if (!strcmp("rmdir", tempArray[0])) {
+ 	 		rmdir(tempArray[1]);
+ 	 	}
+ 	 if (!strcmp("rm", tempArray[0])) {
+ 	 		unlink(tempArray[1]);
+ 	 	}
+
+ 	 if (!strcmp("mkdir", tempArray[0])) 
+ 	 	mkdir(tempArray[1], 0755);
+
+
+ 	 	
+
+  		
+
+
+
+     
+
+
 
       // send the echo line to client 
+
       n = write(client_sock, line, MAX);
 
-      printf("server: wrote n=%d bytes; ECHO=[%s]\n", n, line);
+      temp = 0;
+      for(temp;temp<50;temp++) tempArray[temp][0] = '\0';
+
+      temp=0;
+
+
+      
       printf("server: ready for next request\n");
     }
  }
