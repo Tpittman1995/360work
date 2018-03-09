@@ -7,6 +7,14 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
+#include <sys/stat.h>
+
+#define _POSIX_SOURCE
+#include <dirent.h>
+#include <errno.h>
+#include <sys/types.h>
+#undef _POSIX_SOURCE
+
 #define MAX 256
 
 // Define variables
@@ -15,7 +23,7 @@ struct sockaddr_in  server_addr;
 
 int server_sock, r;
 int SERVER_IP, SERVER_PORT; 
-char * stringList[8] = {"lcat", "lls", "lcd", "lpwd", "lmkdir", "lrmdir", "lrm", 0};
+char * stringList[10] = {"lcat", "lls", "lcd", "lpwd", "lmkdir", "lrmdir", "lrm","get","put", 0};
 char cwd[1024];
 // clinet initialization code
 
@@ -65,7 +73,7 @@ int client_init(char *argv[])
 int findIndex(char line[MAX])
 {
 	int i = 0;
-	for(i = 0; i < 7; i++)
+	for(i = 0; i < 9; i++)
 	{
 		if(!strcmp(line, stringList[i]))
 		{
@@ -108,7 +116,29 @@ if(fd = open(pathname, O_RDONLY))
 
 void lls(char command[MAX], char pathname[MAX])
 {
-	
+  getcwd(cwd, 1024);
+  char lsHelper[MAX];
+  DIR *dir;
+  struct dirent *entry;
+
+  lsHelper[0]='\0';
+  if(!strcmp(pathname, "\0"))
+  {
+    strcpy(pathname, cwd);
+  }
+
+ 
+
+  if ((dir = opendir(pathname)) == NULL)
+    perror("opendir() error");
+  else {
+    while ((entry = readdir(dir)) != NULL){
+     // sprintf(lsHelper, "%s %s", lsHelper, entry->d_name);
+      printf("%s ", entry->d_name);
+    }
+  printf("\n");
+    closedir(dir);
+  }	
 }
 
 
@@ -160,6 +190,62 @@ void lrm(char command[MAX], char pathname[MAX])
    // r = unlink(entry[2].value);
 }
 
+
+
+void get(char command[MAX], char pathname[MAX])
+{
+  char ans[MAX];
+  char buf[256];
+  int size = 0;
+  int fd = 0;
+  int count = 0;
+  int n = read(server_sock, ans, MAX);
+  printf("%s\n",ans );
+  size = atoi(ans);
+
+  fd = open(pathname, O_WRONLY|O_CREAT, 0777);
+  printf("%d\n", size);
+  while(count < size)
+  {
+    printf("in while\n");
+    n = read(server_sock, buf, MAX);
+    //printf("%d\n", n);
+    count += n;
+    write(fd,buf, n);
+  }
+printf("out of while\n");
+close(fd);
+
+
+}
+
+
+  void lput(char command[MAX], char pathname[MAX])
+  {
+    char buff[256];
+    int fd = 0;
+    int n = 0;
+    int SIZE = 0;
+    struct stat st;
+    char line[MAX];
+    printf("sending put command.\n");
+   // strcpy(line,"got get command");
+    stat(pathname,&st);
+    SIZE=st.st_size;
+    sprintf(line, "%d", SIZE);
+    printf("%s\n", line);
+    n=write(server_sock, line, MAX);
+    fd = open(pathname,O_RDONLY);
+    while(n=read(fd, buff, MAX)){
+      n=write(server_sock, buff,n);
+    }
+
+    close(fd);
+
+
+   }
+
+
 main(int argc, char *argv[ ])
 {
   int n;
@@ -179,6 +265,8 @@ main(int argc, char *argv[ ])
   // sock <---> server
   printf("********  processing loop  *********\n");
   while (1){
+    pathname[0] = '\0';
+  command[0] = '\0';
     printf("input a line : ");
     bzero(line, MAX);                // zero out line[ ]
     fgets(line, MAX, stdin);         // get a line (end with \n) from stdin
@@ -187,12 +275,15 @@ main(int argc, char *argv[ ])
     if (line[0]==0)                  // exit if NULL line
        exit(0);
 
+    sscanf(line, "%s %s", command, pathname);
 
-     printf("%s\n", line );
-   	if(line[0] == 'l' && line[1] != 's')
+    // printf("%s\n", line );
+   	if((line[0] == 'l' && line[1] != 's') || line[0] == 'g' || !strcmp(command, "put"))
    	{
-   		sscanf(line, "%s %s", command, pathname);
+
+      printf("%s\n", pathname);
    		n = findIndex(command);
+      printf("%d %s\n", n, command);
    		switch(n)
    		{
    			case 0: //lcat
@@ -224,6 +315,16 @@ main(int argc, char *argv[ ])
    			lrm(command, pathname);
    			break;
 
+        case 7:
+        n = write(server_sock, line, MAX);
+        get(command, pathname);
+        break;
+
+        case 8:
+        n = write(server_sock, line, MAX);
+        lput(command, pathname);
+        break;
+
    			default:
    			printf("Invalid Command\n");
    			break;
@@ -234,9 +335,7 @@ main(int argc, char *argv[ ])
    	else
    	{
     // Send ENTIRE line to server
-      printf("%s\n", line);
-      printf("%s\n", ans);
-      printf("stuff\n");
+      
     n = 0;
     n = write(server_sock, line, MAX);
   //  printf("test");

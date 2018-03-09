@@ -112,6 +112,33 @@ void myLs(char* pathname){
   }
 }
 
+void lput(char pathname[MAX])
+{
+  char ans[MAX];
+  char buf[256];
+  int size = 0;
+  int fd = 0;
+  int count = 0;
+  int n = read(client_sock, ans, MAX);
+  printf("%s\n",ans );
+  size = atoi(ans);
+
+  fd = open(pathname, O_WRONLY|O_CREAT, 0777);
+  printf("%d\n", size);
+  while(count < size)
+  {
+    printf("in while\n");
+    n = read(client_sock, buf, MAX);
+    //printf("%d\n", n);
+    count += n;
+    write(fd,buf, n);
+  }
+printf("out of while\n");
+close(fd);
+
+
+}
+
 main(int argc, char *argv[])
 {
   int temp=0,fd=0;
@@ -153,7 +180,10 @@ main(int argc, char *argv[])
 
      // Processing loop: newsock <----> client
      while(1){
+      line[0] = '\0';
        n = read(client_sock, line, MAX);
+       strcpy(tempArray[0], "\0");
+       strcpy(tempArray[1], "\0");
        if (n==0){
            printf("server: client died, server loops\n");
            close(client_sock);
@@ -222,7 +252,10 @@ main(int argc, char *argv[])
     myLs(tempArray[1]);
    }
 
-   n = write(client_sock, line, MAX);
+   if(!strcmp("put", tempArray[0])){
+    printf("got put command.\n");
+    lput(tempArray[1]);
+   }
 
    if(!strcmp("get", tempArray[0])){
     printf("got get command.\n");
@@ -233,14 +266,19 @@ main(int argc, char *argv[])
     printf("%s\n", line);
     n=write(client_sock, line, MAX);
     fd = open(tempArray[1],O_RDONLY);
-    while(y=read(fd, buff, MAX)){
-      n=write(client_sock, buff,MAX);
+    while(n=read(fd, buff, MAX)){
+      n=write(client_sock, buff,n);
     }
     close(fd);
 
 
    }
+   
 
+   if(strcmp("get", tempArray[0]) && strcmp("put", tempArray[0]))
+   {
+    n = write(client_sock, line, MAX);
+   }
 
     
 
