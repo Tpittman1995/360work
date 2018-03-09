@@ -187,6 +187,8 @@ main(int argc, char *argv[ ])
     if (line[0]==0)                  // exit if NULL line
        exit(0);
 
+
+     printf("%s\n", line );
    	if(line[0] == 'l' && line[1] != 's')
    	{
    		sscanf(line, "%s %s", command, pathname);
@@ -232,13 +234,18 @@ main(int argc, char *argv[ ])
    	else
    	{
     // Send ENTIRE line to server
+      printf("%s\n", line);
+      printf("%s\n", ans);
+      printf("stuff\n");
+    n = 0;
     n = write(server_sock, line, MAX);
-    printf("%s\n", n, line);
+  //  printf("test");
+    printf("%s\n", line);
 
     // Read a line from sock and show it
     n = read(server_sock, ans, MAX);
-    printf("%s\n",n, ans);
-	}
+    printf("%s\n", ans);
+	 }
   }
 }
 
