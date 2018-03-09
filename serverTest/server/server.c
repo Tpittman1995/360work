@@ -191,7 +191,7 @@ main(int argc, char *argv[])
     }
 
     strcpy(line, lsHelper);
-
+//
    }
 
    if (!strcmp("pwd", tempArray[0])) {
