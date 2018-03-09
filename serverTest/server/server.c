@@ -5,6 +5,7 @@
 
 #include <sys/socket.h>
 #include <netdb.h>
+#include <sys/stat.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,6 +18,7 @@
 #include <sys/types.h>
 #undef _POSIX_SOURCE
 #include <stdio.h>
+#include <stdlib.h>
 
 #define  MAX 256
 
@@ -24,9 +26,13 @@
 struct sockaddr_in  server_addr, client_addr, name_addr;
 struct hostent *hp;
 
+int y;
 int  mysock, client_sock;              // socket descriptors
 int  serverPort;                     // server port number
-int  r, length, n;                   // help variables
+int  r, length, n;
+char lsHelper[MAX];
+char buff[MAX];                 // help variables
+int SIZE;
 
 // Server initialization code:
 
@@ -88,8 +94,8 @@ int server_init(char *name)
 void myLs(char* pathname){
   DIR *dir;
   struct dirent *entry;
-  char cwd[128];
 
+  lsHelper[0]='\0';
   
 
  
@@ -97,28 +103,29 @@ void myLs(char* pathname){
   if ((dir = opendir(pathname)) == NULL)
     perror("opendir() error");
   else {
-    while ((entry = readdir(dir)) != NULL)
-      printf("%s ", entry->d_name);
-  printf("\n");
+    while ((entry = readdir(dir)) != NULL){
+      sprintf(lsHelper, "%s %s", lsHelper, entry->d_name);
+      //printf("%s ", entry->d_name);
+    }
+  //printf("\n");
     closedir(dir);
   }
 }
 
 main(int argc, char *argv[])
 {
-	int temp=0;
-	char *s;
-	char *tempArray[50];
+  int temp=0,fd=0;
+  char *s;
+  char *tempArray[50];
    char *hostname;
    char line[MAX];
    char cwd[128];
+   struct stat st;
 
-   printf("HELLo\n");
 
    for(temp;temp<50;temp++) tempArray[temp] = malloc(150);
-   printf("HELLo\n");
 
-   	temp=0;
+    temp=0;
 
    if (argc < 2)
       hostname = "localhost";
@@ -166,51 +173,78 @@ main(int argc, char *argv[])
 
 
       while(s=strtok(0," ")){ 
-      	strcpy(tempArray[temp], s);
-      	temp++;
+        strcpy(tempArray[temp], s);
+        temp++;
       }
 
       
 
      printf("%s\n", tempArray[1]);
- 	 if (!strcmp("ls", tempArray[0])) {
- 	 	if(tempArray[1]!='\0'){
- 	 		myLs(tempArray[1]);
- 	 	}else{
- 	 		printf("HELLOW WORLD foo\n");
- 	 		printf("%s\n", tempArray[1]);
- 	 		myLs(cwd);
- 	 	}
- 	 }
+   if (!strcmp("ls", tempArray[0])) {
+    if(strcmp(tempArray[1],"\0")){
+      myLs(tempArray[1]);
+      //printf("%s\n", lsHelper);
+    }else{
+      getcwd(cwd, 128);
+      myLs(cwd);
+      //printf("%s\n", lsHelper);
+    }
 
- 	 if (!strcmp("pwd", tempArray[0])) {
- 	 	getcwd(cwd, 128);
- 	 	printf("%s\n", cwd);
- 	 	sprintf(line,"%s", cwd);
- 	 	}
+    strcpy(line, lsHelper);
 
- 	 if (!strcmp("cd", tempArray[0])) {
- 	 		chdir(tempArray[1]);
- 	 	}
+   }
 
- 	 if (!strcmp("rm", tempArray[0])) {
- 	 		unlink(tempArray[1]);
- 	 	}
+   if (!strcmp("pwd", tempArray[0])) {
+    getcwd(cwd, 128);
+    printf("%s\n", cwd);
+    sprintf(line,"%s", cwd);
+    }
 
- 	 if (!strcmp("rmdir", tempArray[0])) {
- 	 		rmdir(tempArray[1]);
- 	 	}
- 	 if (!strcmp("rm", tempArray[0])) {
- 	 		unlink(tempArray[1]);
- 	 	}
+   if (!strcmp("cd", tempArray[0])) {
+      chdir(tempArray[1]);
+    }
 
- 	 if (!strcmp("mkdir", tempArray[0])) 
- 	 	mkdir(tempArray[1], 0755);
+   if (!strcmp("rm", tempArray[0])) {
+      unlink(tempArray[1]);
+    }
+
+   if (!strcmp("rmdir", tempArray[0])) {
+      rmdir(tempArray[1]);
+    }
+   if (!strcmp("rm", tempArray[0])) {
+      unlink(tempArray[1]);
+    }
+
+   if (!strcmp("mkdir", tempArray[0])) 
+    mkdir(tempArray[1], 0755);
+
+   if(!strcmp("ls", tempArray[0])){
+    myLs(tempArray[1]);
+   }
+
+   n = write(client_sock, line, MAX);
+
+   if(!strcmp("get", tempArray[0])){
+    printf("got get command.\n");
+    strcpy(line,"got get command");
+    stat(tempArray[1],&st);
+    SIZE=st.st_size;
+    sprintf(line, "%d", SIZE);
+    printf("%s\n", line);
+    n=write(client_sock, line, MAX);
+    fd = open(tempArray[1],O_RDONLY);
+    while(y=read(fd, buff, MAX)){
+      n=write(client_sock, buff,MAX);
+    }
+    close(fd);
 
 
- 	 	
+   }
 
-  		
+
+    
+
+      
 
 
 
@@ -220,7 +254,7 @@ main(int argc, char *argv[])
 
       // send the echo line to client 
 
-      n = write(client_sock, line, MAX);
+      
 
       temp = 0;
       for(temp;temp<50;temp++) tempArray[temp][0] = '\0';
