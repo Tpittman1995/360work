@@ -6,6 +6,8 @@ typedef unsigned char  u8;
 typedef unsigned short u16;
 typedef unsigned int   u32;
 
+#define EXT2_NAME_LEN 255
+
 struct ext2_group_desc
 {
   u32  bg_block_bitmap;          // Bmap block number
