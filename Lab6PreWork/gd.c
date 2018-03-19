@@ -61,6 +61,7 @@ printf("\n");
 super()
 {
   // read Gd block
+  //comment for save passowrd
   get_block(fd, 2, buf);  
   gp = (GD *)buf;
 
