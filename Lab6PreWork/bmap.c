@@ -71,12 +71,12 @@ super()
 {
   // read Gd block
   //comment for save passowrd
-  get_block(fd, 3, buf);  
+  get_block(fd, 8, buf);  
   //gp = (GD *)buf;
   //now we need  to just use buffer
   makeLine();
 
-  for(int i=1;i<(1440);i++){
+  for(int i=1;i<(1439);i++){
     (tst_bit(buf, i)) ? putchar('1') : putchar('0');
     if (i && (i % 8)==0)
        printf(" ");
