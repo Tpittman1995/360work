@@ -45,6 +45,7 @@ struct ext2_super_block {
 **********************************************************************/
 
 char buf[BLKSIZE];
+char search[256];
 int fd;
 
 int get_block(int fd, int blk, char buf[ ])
@@ -69,6 +70,11 @@ int tst_bit(char *buf, int bit)
 
 super()
 {
+  printf("do you want to search for a specific directory?(type no to just print):");
+  bzero(search, 256);                // zero out line[ ]
+  fgets(search, 256, stdin);         // get a line (end with \n) from stdin
+
+  search[strlen(search)-1] = 0;  
   int x = 0;
   // read Gd block
   //comment for save passowrd
