@@ -6,7 +6,7 @@
 typedef unsigned char  u8;
 typedef unsigned short u16;
 typedef unsigned int   u32;
-
+// comment for Vik
 // define shorter TYPES, save typing efforts
 typedef struct ext2_group_desc  GD;
 typedef struct ext2_super_block SUPER;
