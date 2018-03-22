@@ -69,9 +69,16 @@ int tst_bit(char *buf, int bit)
 
 super()
 {
+  int x = 0;
   // read Gd block
   //comment for save passowrd
-  get_block(fd, 33, buf);  
+  get_block(fd, 1, buf);
+  sp = (SUPER *)buf;
+  x = (sp->s_inodes_count/8 );
+  get_block(fd, 2, buf);
+  gp = (GD *)buf;
+  x += gp->bg_inode_table;
+  get_block(fd, x, buf);  
   //gp = (GD *)buf;
   //now we need  to just use buffer
   makeLine();
@@ -91,6 +98,11 @@ while (cp < &(buf[1024]))
 {
  // printf("in while\n");
     printf("rec_len:%d name_len:%d name:%s \n", dp->rec_len, dp->name_len, dp->name);
+    if(!strcmp(dp->name, search))
+    {
+      printf("Directory found\n");
+      break;
+    }
     cp += dp->rec_len;
     dp = (DIR *)cp;
 }

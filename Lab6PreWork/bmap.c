@@ -71,7 +71,9 @@ super()
 {
   // read Gd block
   //comment for save passowrd
-  get_block(fd, 8, buf);  
+  get_block(fd, 2, buf);  
+  gp = (GD *)buf;
+  get_block(fd, gp->bg_block_bitmap, buf);  
   //gp = (GD *)buf;
   //now we need  to just use buffer
   makeLine();
