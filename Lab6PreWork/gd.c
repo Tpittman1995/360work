@@ -58,7 +58,7 @@ for(int i=0;i<assicTimeser;i++) printf("=");
 printf("\n");
 }
 
-super()
+group_desc()
 {
   // read Gd block
   //comment for save passowrd
@@ -114,5 +114,5 @@ main(int argc, char *argv[ ])
     exit(1);
   }
 
-  super();
+  group_desc();
 }
