@@ -158,6 +158,9 @@ for(int z=0;z<numberOfItteration;z++){
        if (!strcmp(dp->name, dirNames[z])){
 
        	//printf("%d\n", dp->file_type);
+       	if (numberOfItteration==z+1){
+       		printf("Found What you were looking for.\n");
+       	}
 
        	iNodePotato=dp->inode;
        	break;
