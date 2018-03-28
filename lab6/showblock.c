@@ -35,9 +35,9 @@ INODE *getInode(int dev, int ino)
   INODE *ip;
   char ibuf[1024];
 
-  int blk = iblk + (ino-1) / ISIZE;
+  int blk = iblk + (ino-1) / 8;
   get_block(dev, blk, ibuf);
-  ip = (INODE *)ibuf + (ino-1) % ISIZE;
+  ip = (INODE *)ibuf + (ino-1) % 8;
 
   inode = *ip;
 
@@ -114,7 +114,12 @@ int main(int argc, char *argv[ ])
   // printf("bmp=%d imap=%d iblk = %d\n", bmap, imap, iblk);
   printf("Inode_table: %d\n", iblk);
 
-  ip = getInode(dev, 2);
+  iNodePotato = 2;
+for(int z=0;z<numberOfItteration;z++){
+  printf("%d\n",iNodePotato);
+  ip = getInode(dev, iNodePotato);
+
+  printf("%x\n", ip->i_mode);
   printf("imode = %4x\n", ip->i_mode);
   if ((ip->i_mode & 0xF000) != 0x4000){
     printf("not a DIR\n");
@@ -126,7 +131,7 @@ int main(int argc, char *argv[ ])
   
 
 
-  for(int z=0;z<numberOfItteration;z++){
+  
   //ip = getInode(dev, 2);
 
   for (i=0; i<12; i++){ // assume: DIRs have at most 12 direct blocks
@@ -147,9 +152,11 @@ int main(int argc, char *argv[ ])
        printf("%4d %4d %4d   %s\n", dp->inode, dp->rec_len, dp->name_len, temp);
 
        if (!strcmp(dp->name, dirNames[z])){
-       	printf("%d\n", dp->file_type);
+
+       	//printf("%d\n", dp->file_type);
+
        	iNodePotato=dp->inode;
-       	
+       	break;
 
        }
 
