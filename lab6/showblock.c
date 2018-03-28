@@ -121,6 +121,10 @@ for(int z=0;z<numberOfItteration;z++){
 
   printf("%x\n", ip->i_mode);
   printf("imode = %4x\n", ip->i_mode);
+  if ((ip->i_mode & 0xF000) == 0x8000){
+    printf("This is a file.\n");
+    exit(1);
+  }
   if ((ip->i_mode & 0xF000) != 0x4000){
     printf("not a DIR\n");
     exit(1);
