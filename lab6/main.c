@@ -163,6 +163,72 @@ void pwd(MINODE * wd)
 
 void list_file()
 {
+	INODE *tempip;
+	char buff[BLKSIZE];
+	char temp[256];
+	char *cp;
+	char *s;
+	int potato=0;
+	MINODE *tempMI;
+
+
+	if (!strcmp(pathname, "\0")){
+		tempip = &((running->cwd)->INODE);
+		printf("size=%d\n", tempip->i_size);
+
+		for (int i=0; i<12; i++){ // assume: DIRs have at most 12 direct blocks
+
+    		if (tempip->i_block[i]==0) break;
+
+    		printf("i_block[%d] = %d\n", i, tempip->i_block[i]);
+    		get_block(dev, tempip->i_block[i], buff);
+
+    		cp = buff;
+    		dp = (DIR *)buff;
+
+    	while(cp<buff+1024){
+    		strncpy(temp, dp->name, dp->name_len);
+       		temp[dp->name_len] = 0;
+  
+       		printf("%s\n", dp->name);
+
+       		cp += dp->rec_len;
+       		dp = (DIR *)cp;
+    	}
+    	}
+	}else{
+		printf("HELLOW\n");
+		potato = kcwgetino(dev, pathname);
+		tempMI = iget(dev, potato);
+		tempip = &(tempMI->INODE);
+		printf("HELLo\n");
+		printf("%d\n", tempMI->ino);
+		printf("size=%d\n", tempip->i_size);
+		//iget(dev, kcwsearch(wd, ".."));
+
+		printf("Pathname given.\n");
+
+		for (int i=0; i<12; i++){ // assume: DIRs have at most 12 direct blocks
+
+    		if (tempip->i_block[i]==0) break;
+
+    		printf("i_block[%d] = %d\n", i, tempip->i_block[i]);
+    		get_block(dev, tempip->i_block[i], buff);
+
+    		cp = buff;
+    		dp = (DIR *)buff;
+
+    	while(cp<buff+1024){
+    		strncpy(temp, dp->name, dp->name_len);
+       		temp[dp->name_len] = 0;
+  
+       		printf("%s\n", dp->name);
+
+       		cp += dp->rec_len;
+       		dp = (DIR *)cp;
+    	}
+    	}
+	}
 
 }
 
