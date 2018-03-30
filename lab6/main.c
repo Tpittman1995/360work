@@ -93,6 +93,81 @@ int mount_root()
 }
 
 char *disk = "mydisk";
+
+char * searchForName(char buf[BLKSIZE], int ino)
+{
+  int i = 0;
+  char temp[256];
+  char * cp;
+  for (i=0; i<12; i++){ // assume: DIRs have at most 12 direct blocks
+    if (ip->i_block[i]==0)
+      break;
+   // printf("i_blokc[%d] = %d\n", i, ip->i_block[i]);
+    get_block(dev, ip->i_block[i], buf);
+
+    cp = buf;
+    dp = (DIR *)buf;
+
+    while(cp < buf+1024){
+       strncpy(temp, dp->name, dp->name_len);
+       temp[dp->name_len] = 0;
+      printf("%d %d\n",dp->inode, ino );
+       if(dp->inode == ino)
+       {
+        printf("%s\n", temp);
+        return;
+       }
+
+       cp += dp->rec_len;
+       dp = (DIR *)cp;      
+    }
+  }
+}
+
+void change_dir()
+{
+  int nodeChange = 0;
+  nodeChange = kcwgetino(dev, pathname);
+  if(nodeChange)
+  {
+    running->cwd = iget(dev, nodeChange);
+  }
+  else
+  {
+    printf("Does not exist\n");
+  }
+}
+
+void pwd(MINODE * wd)
+{
+  printf("%d\n", wd->ino);
+  char buf[BLKSIZE];
+  //if(kcwsearch(wd, "..") == 2)
+  if(wd->ino == 2)
+  {
+    printf("/\n");
+    return;
+  }
+  
+
+  pwd(iget(dev, kcwsearch(wd, "..")));
+  //searchForName(buf, wd->ino);
+  //printf("hello\n");
+  
+  //printf("after rpwd\n");
+  ip = &(wd->INODE);
+  printf("%d\n", wd->ino);
+  searchForName(buf, wd->ino);
+
+}
+
+void list_file()
+{
+
+}
+
+
+
 main(int argc, char *argv[ ])
 {
   int ino;
@@ -157,6 +232,8 @@ main(int argc, char *argv[ ])
        change_dir();
     if (strcmp(cmd, "pwd")==0)
        pwd(running->cwd);
+    if (strcmp(cmd, "print")==0)
+       printf("%d\n", running->cwd->ino);
 
     if (strcmp(cmd, "quit")==0)
        quit();
