@@ -26,7 +26,7 @@ char line[128], cmd[32], pathname[64];
 char gpath[128];   // hold tokenized strings
 char *name[64];    // token string pointers
 int  n;            // number of token strings 
-
+char pwdBuf[1024];
 MINODE *iget(int dev, int ino)
 {
   printf("iget(%d %d): ", dev, ino);
@@ -111,10 +111,13 @@ char * searchForName(char buf[BLKSIZE], int ino)
     while(cp < buf+1024){
        strncpy(temp, dp->name, dp->name_len);
        temp[dp->name_len] = 0;
-      printf("%d %d\n",dp->inode, ino );
+     // printf("%d %d\n",dp->inode, ino );
        if(dp->inode == ino)
        {
-        printf("%s\n", temp);
+        //printf("%s\n", temp);
+        strcat(pwdBuf, "/");
+        strcat(pwdBuf, temp);
+
         return;
        }
 
@@ -138,14 +141,23 @@ void change_dir()
   }
 }
 
+
 void pwd(MINODE * wd)
 {
-  printf("%d\n", wd->ino);
+  //printf("%d\n", wd->ino);
   char buf[BLKSIZE];
-  //if(kcwsearch(wd, "..") == 2)
   if(wd->ino == 2)
   {
-    printf("/\n");
+    printf("/");
+    return;
+  }
+  if(kcwsearch(wd, "..") == 2)
+  {
+    ip = &((iget(dev, kcwsearch(wd, "..")))->INODE);
+    
+    //printf("/\n");
+    //strcat(pwdBuf, "/");
+    searchForName(buf, wd->ino);
     return;
   }
   
@@ -155,11 +167,13 @@ void pwd(MINODE * wd)
   //printf("hello\n");
   
   //printf("after rpwd\n");
-  ip = &(wd->INODE);
+  //ip = &(wd->INODE);
+  ip = &((iget(dev, kcwsearch(wd, "..")))->INODE);
   printf("%d\n", wd->ino);
   searchForName(buf, wd->ino);
 
 }
+
 
 void list_file()
 {
@@ -172,7 +186,7 @@ main(int argc, char *argv[ ])
 {
   int ino;
   char buf[BLKSIZE];
-
+  pwdBuf[0] = 0;
   if (argc > 1)
     disk = argv[1];
 
@@ -214,6 +228,7 @@ main(int argc, char *argv[ ])
 
   //printf("hit a key to continue : "); getchar();
   while(1){
+    pwdBuf[0] = 0;
     printf("input command : [ls|cd|pwd|quit] ");
     fgets(line, 128, stdin);
 
@@ -232,6 +247,7 @@ main(int argc, char *argv[ ])
        change_dir();
     if (strcmp(cmd, "pwd")==0)
        pwd(running->cwd);
+       printf("%s\n", pwdBuf);
     if (strcmp(cmd, "print")==0)
        printf("%d\n", running->cwd->ino);
 
