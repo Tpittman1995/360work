@@ -99,9 +99,12 @@ int main(int argc, char *argv[ ])
   //print super block stuff
   printf("s_inodes_count: %d\n", sp->s_inodes_count);
 
+
+if((argc > 2) && (strcmp(argv[2], "/")))
+{
   strcpy(tempString,argv[2]);
   makeNames();
-
+}
 
   
   // read GD block to get GD0
@@ -115,7 +118,7 @@ int main(int argc, char *argv[ ])
   printf("Inode_table: %d\n", iblk);
 
   iNodePotato = 2;
-for(int z=0;z<numberOfItteration;z++){
+for(int z=0;z<=numberOfItteration;z++){
   printf("%d\n",iNodePotato);
   ip = getInode(dev, iNodePotato);
 
@@ -159,17 +162,28 @@ for(int z=0;z<numberOfItteration;z++){
 
        	//printf("%d\n", dp->file_type);
        	if (numberOfItteration==z+1){
-       		printf("Found What you were looking for.\n");
-       	}
+       		printf("Found What you were looking for.\nContents of searched directory\n");
+       }
+      
 
        	iNodePotato=dp->inode;
        	break;
 
        }
+      
 
        cp += dp->rec_len;
        dp = (DIR *)cp;
+
+       if(strcmp(dp->name, dirNames[z]) && (numberOfItteration == z+1) && (cp >= buf+1024))
+       {
+        printf("Directory does not exist\n");
+        z++;
+       }
     }
   }
+
+
+
 }
 }
