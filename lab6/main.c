@@ -251,6 +251,9 @@ void list_file()
 int my_mkdir(char* path){
   //local vars
   MINODE *parentInode;
+  INODE *tempip;
+  int potato=0;
+
   int parentInodeNumber=0;
   char child[100];
   int i=0, sizeOfparent=0;
@@ -274,9 +277,29 @@ int my_mkdir(char* path){
   parentInodeNumber=getino(dev, path);
   parentInode = iget(dev, parentInodeNumber);
 
+  tempip = &(parentInode->INODE);
+
+  //check for dir
+  if ((tempip->i_mode & 0xF000) != 0x4000){
+    printf("[ERROR] Parent Dir is Not a Dir.\n");
+    return 0;
+  }
+
+  potato=kcwsearch(tempip, child);
+
+  if (potato){
+    printf("[ERROR] Dir already exist.\n");
+    return 0;
+  }
+
   
 
-  printf("Parent Inode Number: %d", parentInode->ino);
+
+
+
+  
+
+  printf("Inode Imode=%x\nPotato Value=%d\n", tempip->i_mode, potato);
 
 }
 
