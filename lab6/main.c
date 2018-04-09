@@ -7,6 +7,7 @@
 #include <ext2fs/ext2_fs.h> 
 
 #include "type.h"
+#include "mkdir.c"
 
 
 MINODE minode[NMINODE];
@@ -301,6 +302,7 @@ main(int argc, char *argv[ ])
 
     line[strlen(line)-1] = 0;
 
+
     if (line[0]==0)
       continue;
     pathname[0] = 0;
@@ -317,6 +319,8 @@ main(int argc, char *argv[ ])
        printf("%s\n", pwdBuf);
     if (strcmp(cmd, "print")==0)
        printf("%d\n", running->cwd->ino);
+
+    if (!strcmp(cmd, "mkdir")) my_mkdir(pathname);
 
     if (strcmp(cmd, "quit")==0)
        quit();

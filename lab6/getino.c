@@ -117,6 +117,8 @@ int tokenize(char *pathname)
   for (i= 0; i<n; i++)
     printf("%s  ", name[i]);
   printf("\n");
+
+  return n;
 }
 
 int kcwsearch(MINODE *mip, char *name)
