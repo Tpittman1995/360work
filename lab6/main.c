@@ -248,6 +248,38 @@ void list_file()
 
 }
 
+int my_mkdir(char* path){
+  //local vars
+  MINODE *parentInode;
+  int parentInodeNumber=0;
+  char child[100];
+  int i=0, sizeOfparent=0;
+
+  printf("mkdir()\n");
+
+  //tokenize path just in case
+  tokenize(path);
+
+  //hand ablosute or relative path
+  if (path[0]=='/') dev = root->dev;
+  else {
+    dev = running->cwd->dev;
+    sizeOfparent= -1;
+  }
+
+  for(i=0;i<(n-1);i++) sizeOfparent+=(strlen(name[i])+1);
+  path[sizeOfparent]=0;
+  strcpy(child, name[i++]);
+
+  parentInodeNumber=getino(dev, path);
+  parentInode = iget(dev, parentInodeNumber);
+
+  
+
+  printf("Parent Inode Number: %d", parentInode->ino);
+
+}
+
 
 
 main(int argc, char *argv[ ])
