@@ -115,6 +115,7 @@ void rm_child(MINODE *pip, char * myname)
 	int j = 0;
 	char temp[256];
 	int i = 0;
+	int flag=0;
 	int IDEAL_LEN = 0;
 	for (i=0; i<12; i++){ // search direct blocks only
      if (pip->INODE.i_block[i] == 0) 
@@ -124,6 +125,7 @@ void rm_child(MINODE *pip, char * myname)
      DIR * dp = (DIR *)buf;
      char * cp = buf;
      DIR * dp_prev = (DIR *)buf;
+
      printf("before while\n");
      printf("%d\n", cp);
      printf("%d\n", buf);
@@ -140,6 +142,8 @@ void rm_child(MINODE *pip, char * myname)
        //printf("%s  ", temp);
        if(strcmp(dp->name, myname) == 0)
        {
+
+       	
      
        	printf("in first if\n");
        		if (IDEAL_LEN != dp->rec_len){
@@ -152,7 +156,57 @@ void rm_child(MINODE *pip, char * myname)
     			return;
 
        		}
+       		else if(cp == buf && IDEAL_LEN != dp->rec_len)
+       		{
+       			pip->INODE.i_size -= 1024;
+       			printf("%d\n", pip->INODE.i_size);
+       			for(j = i; j < 11; j++)
+       			{
+       				pip->INODE.i_block[j] = pip->INODE.i_block[j+1];
+       			}
+       			pip->INODE.i_block[11] = 0;
+       			pip->dirty = 1;
+    			iput(pip);
+    			put_block(pip->dev, pip->INODE.i_block[i], buf);
+    			return;
+       		}
+       		else
+       		{
+       			printf("in else\n");
+       			printf("%d\n", cp);
+       			printf("%d\n", buf);
+       			printf("%d\n",dp->rec_len );
+       			//exit(1);
+       			while(cp<buf+1024){
+       				printf("%u\n", cp);
+       			printf("%u\n", buf);
+
+       				//exit(1);
+
+       				dp_prev=(DIR *) cp;
+       				cp+=dp->rec_len;
+       				dp=(DIR *)cp;
+				printf("%u\n", cp);
+       			printf("%u\n", buf);   
+       			//exit(1);    				
+       			printf("%s\n", dp_prev->name);
+       			dp_prev=dp;
+       			printf("%s\n", dp_prev->name);
+
+       			//exit(1);
+       			}
+
+       			dp->rec_len+=IDEAL_LEN;
+
+
+       			printf("after for loop\n");
+       			pip->dirty = 1;
+    			iput(pip);
+    			put_block(pip->dev, pip->INODE.i_block[i], buf);
+    			return;
+       		}
        		//else if()
+
   		}
        if(cp > buf)
        {
