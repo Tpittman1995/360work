@@ -7,7 +7,6 @@
 #include <ext2fs/ext2_fs.h> 
 
 #include "type.h"
-#include "mkdir.c"
 
 
 MINODE minode[NMINODE];
@@ -28,6 +27,92 @@ char gpath[128];   // hold tokenized strings
 char *name[64];    // token string pointers
 int  n;            // number of token strings 
 char pwdBuf[1024];
+
+
+int tst_bit(char *buf, int bit)
+{
+  int i, j;
+  i = bit/8; j=bit%8;
+  if (buf[i] & (1 << j))
+     return 1;
+  return 0;
+}
+
+int set_bit(char *buf, int bit)
+{
+  int i, j;
+  i = bit/8; j=bit%8;
+  buf[i] |= (1 << j);
+}
+
+int clr_bit(char *buf, int bit)
+{
+  int i, j;
+  i = bit/8; j=bit%8;
+  buf[i] &= ~(1 << j);
+}
+
+int decFreeInodes(int dev)
+{
+  char buf[BLKSIZE];
+
+  // dec free inodes count in SUPER and GD
+  get_block(dev, 1, buf);
+  sp = (SUPER *)buf;
+  sp->s_free_blocks_count--;
+  put_block(dev, 1, buf);
+
+  get_block(dev, 2, buf);
+  gp = (GD *)buf;
+  gp->bg_free_blocks_count--;
+  put_block(dev, 2, buf);
+}
+
+int ialloc(int dev)
+{
+  int  i;
+  char buf[BLKSIZE];
+
+  // read inode_bitmap block
+  get_block(dev, imap, buf);
+
+  for (i=0; i < ninodes; i++){
+    if (tst_bit(buf, i)==0){
+       set_bit(buf,i);
+       decFreeInodes(dev);
+
+       put_block(dev, imap, buf);
+
+       return i+1;
+    }
+  }
+  printf("ialloc(): no more free inodes\n");
+  return 0;
+}
+
+int balloc(int dev)
+{
+  int  i;
+  char buf[BLKSIZE];
+
+  // read inode_bitmap block
+  get_block(dev, bmap, buf);
+
+  for (i=0; i < ninodes; i++){
+    if (tst_bit(buf, i)==0){
+       set_bit(buf,i);
+       decFreeInodes(dev);
+
+       put_block(dev, bmap, buf);
+
+       return i+1;
+    }
+  }
+  printf("ialloc(): no more free inodes\n");
+  return 0;
+}
+
+
 MINODE *iget(int dev, int ino)
 {
   printf("iget(%d %d): ", dev, ino);
@@ -248,6 +333,123 @@ void list_file()
 
 }
 
+int mymkdir(MINODE *pip, char *name){
+  int ino=0, bno=0;
+  MINODE *tempMI;
+  DIR   *dp;
+  char  *cp;
+  char buf[1024];
+
+  ino=ialloc(dev);
+  bno=balloc(dev);
+
+  tempMI=iget(dev, ino);
+  INODE *ip=&(tempMI->INODE);
+
+  ip->i_mode = 0x41ED;
+  ip->i_uid  = running->uid;  // Owner uid 
+  ip->i_gid  = running->gid;  // Group Id
+  ip->i_size = BLKSIZE;   // Size in bytes 
+  ip->i_links_count = 2;          // Links count=2 because of . and ..
+  ip->i_atime = ip->i_ctime = ip->i_mtime = time(0L);  // set to current time
+  ip->i_blocks = 2;                 // LINUX: Blocks count in 512-byte chunks 
+  ip->i_block[0] = bno;             // new DIR has one data block   
+  for(int i=1; i<15;i++) ip->i_block[i]=0;
+  //ip->i_block1] to i_block[14] = 0;
+
+  tempMI->dirty=1;
+
+  iput(tempMI);
+
+  get_block(dev, ip->i_block[0], buf);
+
+  cp=buf;
+  dp = (DIR *)buf;
+
+
+  dp->inode=ino;
+  dp->rec_len=12;
+  dp->name_len=1;
+  strcpy(dp->name, ".");
+
+  cp+=dp->rec_len;
+  dp=(DIR *)cp;
+
+  dp->inode=pip->ino;
+  dp->rec_len=1012;
+  dp->name_len=2;
+  strcpy(dp->name, "..");
+
+  put_block(dev, ip->i_block[0], buf);
+
+  printf("Allocated Inode and Iblock\nino=%d\nbno=%d\n", ino,bno);
+
+  enter_name(pip, ino, name);
+}
+
+int enter_name(MINODE *pip, int myino, char *myname){
+  //localvars
+  DIR   *dp;
+  char  *cp;
+  char buf[1024];
+  INODE *ip=&(pip->INODE);
+  int IDEAL_LEN=0, restMem=0, needLen=0;
+  char temp[256];
+
+  //start loop
+  for(int i=0;i<12;i++){
+    //check if bot is empty or not
+    if (ip->i_block[i]==0) break;
+
+    get_block(dev, ip->i_block[i], buf);
+
+    cp=buf;
+    dp=(DIR *)cp;
+
+    while(cp < buf+1024){
+      strncpy(temp, dp->name, dp->name_len);
+      temp[dp->name_len] = 0;
+      
+      IDEAL_LEN = 4*((8 + strlen(temp) + 3)/4);
+
+      printf("IDEAL_LEN=%d rec_len=%d\n", IDEAL_LEN, dp->rec_len);
+
+      if(IDEAL_LEN!=dp->rec_len){
+        printf("Found last entry in data block.\n");
+        needLen= 4*( (8 + strlen(myname) + 3)/4 );
+        if(needLen>dp->rec_len){
+          printf("[ERROR] Not enough space to add Another dir.\n");
+          return;
+        }
+        //record the rest of len and set the pervious block to idea
+        restMem=dp->rec_len;
+        dp->rec_len=IDEAL_LEN;
+
+        //to after the last block and put it dp find out len needed
+        cp+=dp->rec_len;
+        dp=(DIR *)cp;
+
+        dp->inode=myino;
+        dp->rec_len=restMem-IDEAL_LEN;
+        dp->name_len=strlen(myname);
+        strcpy(dp->name, myname);
+
+        put_block(dev, ip->i_block[i], buf);
+
+        break;
+
+
+      }
+
+
+      cp += dp->rec_len;
+      dp = (DIR *)cp;
+    }
+
+  }
+}
+
+
 int my_mkdir(char* path){
   //local vars
   MINODE *parentInode;
@@ -257,6 +459,7 @@ int my_mkdir(char* path){
   int parentInodeNumber=0;
   char child[100];
   int i=0, sizeOfparent=0;
+  int flag=0;
 
   printf("mkdir()\n");
 
@@ -266,6 +469,7 @@ int my_mkdir(char* path){
   //hand ablosute or relative path
   if (path[0]=='/') dev = root->dev;
   else {
+    flag=1;
     dev = running->cwd->dev;
     sizeOfparent= -1;
   }
@@ -274,8 +478,109 @@ int my_mkdir(char* path){
   path[sizeOfparent]=0;
   strcpy(child, name[i++]);
 
+  if (flag){
+    parentInodeNumber=kcwsearch(running->cwd, ".");
+    parentInode = iget(dev, parentInodeNumber);
+  }else{
   parentInodeNumber=getino(dev, path);
   parentInode = iget(dev, parentInodeNumber);
+}
+
+  tempip = &(parentInode->INODE);
+
+  //check for dir
+  if ((tempip->i_mode & 0xF000) != 0x4000){
+    printf("[ERROR] Parent Dir is Not a Dir.\n");
+    return 0;
+  }
+  // char buffer[1024];
+  // get_block(dev, parentInode->INODE.i_block[0], buffer);
+  // DIR * potat = (DIR *) buffer;
+  // printf("%s\n", potat->name);
+
+  potato=kcwsearch(tempip, child);
+
+  if (potato){
+    printf("[ERROR] Dir already exist.\n");
+    return 0;
+  }
+
+
+  mymkdir(parentInode, child);
+
+  (parentInode->INODE).i_links_count++;
+  (parentInode->INODE).i_atime=time(0L);
+
+  iput(parentInode);
+
+
+  printf("Inode Imode=%x\nPotato Value=%d\n", tempip->i_mode, potato);
+}
+
+int my_creat(MINODE *pip, char *name){
+  int ino=0;
+  MINODE *tempMI;
+  DIR   *dp;
+  char  *cp;
+  char buf[1024];
+
+  ino=ialloc(dev);
+
+  tempMI=iget(dev, ino);
+  INODE *ip=&(tempMI->INODE);
+
+  ip->i_mode = 0x81A4;
+  ip->i_uid  = running->uid;  // Owner uid 
+  ip->i_gid  = running->gid;  // Group Id
+  ip->i_size = 0;   // Size in bytes 
+  ip->i_links_count = 1;          // Links count=2 because of . and ..
+  ip->i_atime = ip->i_ctime = ip->i_mtime = time(0L);  // set to current time
+  ip->i_blocks = 2;                 // LINUX: Blocks count in 512-byte chunks 
+  ip->i_block[0] = 0;             // new DIR has one data block   
+  for(int i=1; i<15;i++) ip->i_block[i]=0;
+
+  tempMI->dirty=1;
+
+  iput(tempMI);
+
+  enter_name(pip, ino, name);
+
+}
+
+int creat_file(char* path){
+  MINODE *parentInode;
+  INODE *tempip;
+  int potato=0;
+
+  int parentInodeNumber=0;
+  char child[100];
+  int i=0, sizeOfparent=0;
+  int flag=0;
+
+  printf("creat()\n");
+
+  //tokenize path just in case
+  tokenize(path);
+
+  //hand ablosute or relative path
+  if (path[0]=='/') dev = root->dev;
+  else {
+    flag=1;
+    dev = running->cwd->dev;
+    sizeOfparent= -1;
+  }
+
+  for(i=0;i<(n-1);i++) sizeOfparent+=(strlen(name[i])+1);
+  path[sizeOfparent]=0;
+  strcpy(child, name[i++]);
+
+  if (flag){
+    parentInodeNumber=kcwsearch(running->cwd, ".");
+    parentInode = iget(dev, parentInodeNumber);
+  }else{
+  parentInodeNumber=getino(dev, path);
+  parentInode = iget(dev, parentInodeNumber);
+  }
 
   tempip = &(parentInode->INODE);
 
@@ -288,20 +593,16 @@ int my_mkdir(char* path){
   potato=kcwsearch(tempip, child);
 
   if (potato){
-    printf("[ERROR] Dir already exist.\n");
+    printf("[ERROR] File/Dir already exist.\n");
     return 0;
   }
 
-  
+  my_creat(parentInode, child);
 
 
-
-
-  
-
-  printf("Inode Imode=%x\nPotato Value=%d\n", tempip->i_mode, potato);
-
+  iput(parentInode);
 }
+
 
 
 
@@ -352,7 +653,7 @@ main(int argc, char *argv[ ])
   //printf("hit a key to continue : "); getchar();
   while(1){
     pwdBuf[0] = 0;
-    printf("input command : [ls|cd|pwd|quit] ");
+    printf("input command : [ls|cd|pwd|mkdir|creat|quit] ");
     fgets(line, 128, stdin);
 
     line[strlen(line)-1] = 0;
@@ -376,6 +677,7 @@ main(int argc, char *argv[ ])
        printf("%d\n", running->cwd->ino);
 
     if (!strcmp(cmd, "mkdir")) my_mkdir(pathname);
+    if (!strcmp(cmd, "creat")) creat_file(pathname);
 
     if (strcmp(cmd, "quit")==0)
        quit();
