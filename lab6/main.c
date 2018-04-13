@@ -130,6 +130,7 @@ int getino(int dev, char *pathename)
   return kcwgetino(dev, pathname);
 }
 #include "util.c"
+#include "rmdir.c"
 /*
 #include "ls_cd_pwd.c"
 */
@@ -219,6 +220,12 @@ void change_dir()
   nodeChange = kcwgetino(dev, pathname);
   if(nodeChange)
   {
+    MINODE * temp = iget(dev, nodeChange);
+    if ((temp->INODE.i_mode & 0xF000) != 0x4000){
+      printf("not a DIR\n");
+      return;
+    }
+    printf("changing directory\n");
     running->cwd = iget(dev, nodeChange);
   }
   else
@@ -678,7 +685,10 @@ main(int argc, char *argv[ ])
 
     if (!strcmp(cmd, "mkdir")) my_mkdir(pathname);
     if (!strcmp(cmd, "creat")) creat_file(pathname);
-
+    if(!strcmp(cmd, "rmdir"))
+    {
+      my_rmdir(pathname);
+    }
     if (strcmp(cmd, "quit")==0)
        quit();
   }
