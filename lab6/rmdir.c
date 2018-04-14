@@ -113,7 +113,10 @@ void rm_child(MINODE *pip, char * myname)
 	printf("in rmchild\n");
 	char buf[1024];
 	int j = 0;
+	int removedMem = 0;
+	int totalMem = 0;
 	char temp[256];
+	char * cpp;
 	int i = 0;
 	int flag=0;
 	int IDEAL_LEN = 0;
@@ -135,6 +138,7 @@ void rm_child(MINODE *pip, char * myname)
      	//printf("in while\n");
      	printf("%s\n", dp->name);
      	printf("%s\n", myname);
+     	//getchar();
        strncpy(temp, dp->name, dp->name_len);
        temp[dp->name_len] = 0;
        IDEAL_LEN = 4*((8 + strlen(temp) + 3)/4);
@@ -172,33 +176,15 @@ void rm_child(MINODE *pip, char * myname)
        		}
        		else
        		{
-       			printf("in else\n");
-       			printf("%d\n", cp);
-       			printf("%d\n", buf);
-       			printf("%d\n",dp->rec_len );
-       			//exit(1);
-       			while(cp<buf+1024){
-       				printf("%u\n", cp);
-       			printf("%u\n", buf);
+       			removedMem = dp->rec_len;
+       			memcpy(cp, cp+(dp->rec_len), 1024 - dp->rec_len - totalMem);
 
-       				//exit(1);
-
-       				dp_prev=(DIR *) cp;
-       				cp+=dp->rec_len;
-       				dp=(DIR *)cp;
-				printf("%u\n", cp);
-       			printf("%u\n", buf);   
-       			//exit(1);    				
-       			printf("%s\n", dp_prev->name);
-       			dp_prev=dp;
-       			printf("%s\n", dp_prev->name);
-
-       			//exit(1);
+       			while(IDEAL_LEN == dp->rec_len)
+       			{
+       				 cp += dp->rec_len;
+      				 dp = (DIR *)cp;
        			}
-
-       			dp->rec_len+=IDEAL_LEN;
-
-
+       			dp->rec_len+= removedMem;
        			printf("after for loop\n");
        			pip->dirty = 1;
     			iput(pip);
@@ -214,6 +200,7 @@ void rm_child(MINODE *pip, char * myname)
        } 
        cp += dp->rec_len;
        dp = (DIR *)cp;
+       totalMem += dp->rec_len;
 
      }
      
@@ -221,29 +208,44 @@ void rm_child(MINODE *pip, char * myname)
 }
 
 int my_rmdir(char* path){
+	printf("%s %s %s\n", name[0], name[1], name[2]);
+	printf("%d\n", n);
+	char child[256];
+	//char parent[256];
 	//printf("Hello World: %s\n", path);
 	int pino = 0;
 
 	char ppath[256];
 	tokenize(path);
+	strcpy(child, name[n-1]);
+
+	//strcpy(parent, name[n-2]);
 	int ino = kcwgetino(dev, path);
+
+	printf("%s %s %s\n", name[0], name[1], name[2]);
+	printf("%d\n", n);
 	printf("ljalg\n");
 	if(ino == 0)
 	{
 		printf("incorrect path or directory does not exist\n");
 		return;
 	}
+	//exit(1);
 	int i = 0;
 
-	MINODE * mip = iget(dev, ino);
+	MINODE * mip = kcwiget(dev, ino);
 	printf("%d %s\n", mip->refCount, path);
 	strcpy(ppath, path);
-	if(path[0] == '/')
+	if(path[0] == '/' && n == 1)
+	{
+		pino = 2;
+	}
+	else if(path[0] == '/')
 	{
 		printf("in if\n");
 		ppath[strlen(ppath)] = 0;
-		ppath[strlen(ppath)- 1] = 0;
-		ppath[strlen(ppath)- 1] = 0;
+		ppath[strlen(ppath)- strlen(child)] = 0;
+		//ppath[strlen(ppath)- 1] = 0;
 		printf("%s\n", ppath);
 		pino = kcwgetino(dev, ppath);
 	}
@@ -258,7 +260,7 @@ int my_rmdir(char* path){
 	//printf("%s\n", name[n-2]);
 	//int pino = kcwsearch(name[n-2]);
 	printf("hello\n");
-	MINODE * pip = iget(dev, pino);
+	MINODE * pip = kcwiget(dev, pino);
 	//char * name;
 	//MINODE * mip = iget(dev, ino);	
 	mip->refCount--;
@@ -300,8 +302,9 @@ int my_rmdir(char* path){
          idealloc(mip->dev, mip);
          printf("after idealloc\n");
     	 iput(mip); //(which clears mip->refCount = 0); 
-    	 printf("%s\n", name[n]); 
-    	 rm_child(pip, name[n]);
+    	 printf("%s\n", child); 
+    	 printf("checking\n");
+    	 rm_child(pip, child);
 
 
      }	

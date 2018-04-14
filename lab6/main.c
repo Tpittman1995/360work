@@ -218,15 +218,17 @@ void change_dir()
 {
   int nodeChange = 0;
   nodeChange = kcwgetino(dev, pathname);
+
   if(nodeChange)
   {
     MINODE * temp = iget(dev, nodeChange);
+    temp->refCount--;
     if ((temp->INODE.i_mode & 0xF000) != 0x4000){
       printf("not a DIR\n");
       return;
     }
     printf("changing directory\n");
-    running->cwd = iget(dev, nodeChange);
+    running->cwd = temp;
   }
   else
   {
@@ -615,6 +617,11 @@ int creat_file(char* path){
 
 main(int argc, char *argv[ ])
 {
+  int k = 0;
+  for(k = 0; k < 64; k++)
+  {
+    name[k] = (char *)malloc(sizeof(char)*256);
+  }
   int ino;
   char buf[BLKSIZE];
   pwdBuf[0] = 0;
