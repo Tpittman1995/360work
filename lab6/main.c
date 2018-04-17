@@ -667,7 +667,7 @@ main(int argc, char *argv[ ])
   //printf("hit a key to continue : "); getchar();
   while(1){
     pwdBuf[0] = 0;
-    printf("input command : [ls|cd|pwd|mkdir|creat|quit] ");
+    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|quit] ");
     fgets(line, 128, stdin);
 
     line[strlen(line)-1] = 0;
