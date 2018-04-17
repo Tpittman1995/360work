@@ -222,13 +222,15 @@ void change_dir()
   if(nodeChange)
   {
     MINODE * temp = iget(dev, nodeChange);
-    temp->refCount--;
+    //temp->refCount--;
     if ((temp->INODE.i_mode & 0xF000) != 0x4000){
       printf("not a DIR\n");
+      iput(temp);
       return;
     }
     printf("changing directory\n");
     running->cwd = temp;
+    iput(temp);
   }
   else
   {
@@ -240,6 +242,7 @@ void change_dir()
 
 void pwd(MINODE * wd)
 {
+  MINODE * temp;
   //printf("%d\n", wd->ino);
   char buf[BLKSIZE];
   if(wd->ino == 2)
@@ -249,11 +252,13 @@ void pwd(MINODE * wd)
   }
   if(kcwsearch(wd, "..") == 2)
   {
-    ip = &((iget(dev, kcwsearch(wd, "..")))->INODE);
+    temp = iget(dev, kcwsearch(wd, ".."));
+    ip = &(temp->INODE);
     
     //printf("/\n");
     //strcat(pwdBuf, "/");
     searchForName(buf, wd->ino);
+    iput(temp);
     return;
   }
   
@@ -264,9 +269,11 @@ void pwd(MINODE * wd)
   
   //printf("after rpwd\n");
   //ip = &(wd->INODE);
-  ip = &((iget(dev, kcwsearch(wd, "..")))->INODE);
+  temp = iget(dev, kcwsearch(wd, ".."));
+  ip = &(temp->INODE);
   printf("%d\n", wd->ino);
   searchForName(buf, wd->ino);
+  iput(temp);
 
 }
 
