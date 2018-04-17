@@ -62,7 +62,7 @@ void idealloc(int dev, MINODE * mip)
   // read inode_bitmap block
   get_block(dev, imap, buf);
   printf("after get block %d\n", mip->ino);
-  clr_bit(buf, (mip->ino + 1));
+  clr_bit(buf, (mip->ino - 1));
   printf("after clr bit\n");
   incFreeInodes(dev);
  	printf("after inc\n");
@@ -164,6 +164,7 @@ void rm_child(MINODE *pip, char * myname)
        		{
        			pip->INODE.i_size -= 1024;
        			printf("%d\n", pip->INODE.i_size);
+       			bdealloc(pip->dev, pip->INODE.i_block[i]);
        			for(j = i; j < 11; j++)
        			{
        				pip->INODE.i_block[j] = pip->INODE.i_block[j+1];
