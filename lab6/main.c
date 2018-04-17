@@ -21,7 +21,7 @@ INODE *ip;
 
 int fd, dev;
 int nblocks, ninodes, bmap, imap, iblk;
-char line[128], cmd[32], pathname[64];
+char line[128], cmd[32], pathname[64], pathname1[64];
 
 char gpath[128];   // hold tokenized strings
 char *name[64];    // token string pointers
@@ -612,7 +612,10 @@ int creat_file(char* path){
   iput(parentInode);
 }
 
+try_link(char* source, char* dest){
+  printf("%s %s\n", source, dest);
 
+}
 
 
 main(int argc, char *argv[ ])
@@ -667,7 +670,7 @@ main(int argc, char *argv[ ])
   //printf("hit a key to continue : "); getchar();
   while(1){
     pwdBuf[0] = 0;
-    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|quit] ");
+    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|link|quit] ");
     fgets(line, 128, stdin);
 
     line[strlen(line)-1] = 0;
@@ -677,7 +680,7 @@ main(int argc, char *argv[ ])
       continue;
     pathname[0] = 0;
 
-    sscanf(line, "%s %s", cmd, pathname);
+    sscanf(line, "%s %s %s", cmd, pathname, pathname1);
     printf("cmd=%s pathname=%s\n", cmd, pathname);
 
     if (strcmp(cmd, "ls")==0)
@@ -692,6 +695,7 @@ main(int argc, char *argv[ ])
 
     if (!strcmp(cmd, "mkdir")) my_mkdir(pathname);
     if (!strcmp(cmd, "creat")) creat_file(pathname);
+    if (!strcmp(cmd, "link")) try_link(pathname, pathname1);
     if(!strcmp(cmd, "rmdir"))
     {
       my_rmdir(pathname);
