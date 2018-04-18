@@ -132,6 +132,7 @@ int getino(int dev, char *pathename)
 #include "util.c"
 #include "rmdir.c"
 #include "unlink.c"
+#include "readlink.c"
 /*
 #include "ls_cd_pwd.c"
 */
@@ -744,8 +745,8 @@ try_symlink(char* source, char* dest){
 
   creat_file(temp);
 
-  int getIno=getino(dev, temp);
-  MINODE *mip=iget(dev, getIno);
+  int getIno=kcwgetino(dev, temp);
+  MINODE *mip=kcwiget(dev, getIno);
 
   mip->INODE.i_mode = 0xA1A4;
   mip->INODE.i_size = strlen(source);
