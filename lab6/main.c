@@ -132,6 +132,7 @@ int getino(int dev, char *pathename)
 #include "util.c"
 #include "rmdir.c"
 #include "unlink.c"
+#include "readlink.c"
 /*
 #include "ls_cd_pwd.c"
 */

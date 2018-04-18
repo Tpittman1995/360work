@@ -9,10 +9,11 @@ extern int bmap, imap;
 
 void readlink(char * path)
 {
+	printf("lagsohad;lasl\n");
 	char buff[1024];
 	int ino = kcwgetino(dev, path);
 	MINODE * mip = kcwiget(dev, ino);
-
+	printf("%x\n", mip->INODE.i_mode);
 	if((mip->INODE.i_mode & 0xF000) != 0xA000){
     	printf("Not a symlink\n");
     	iput(mip); //(which clears mip->refCount = 0);
@@ -22,10 +23,10 @@ void readlink(char * path)
 
   	for (int i=0; i<12; i++){ 
 
-    		if (tempip->i_block[i]==0) break;
+    		if (mip->INODE.i_block[i]==0) break;
 
     		
-    		get_block(dev, tempip->i_block[i], buff);
+    		get_block(dev, mip->INODE.i_block[i], buff);
 
     		printf("%s\n", buff);
     	
