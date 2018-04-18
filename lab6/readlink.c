@@ -9,6 +9,7 @@ extern int bmap, imap;
 
 void readlink(char * path)
 {
+	char buff[1024];
 	int ino = kcwgetino(dev, path);
 	MINODE * mip = kcwiget(dev, ino);
 
