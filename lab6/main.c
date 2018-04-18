@@ -743,7 +743,8 @@ try_symlink(char* source, char* dest){
   printf("Dest=%s\n", temp);
 
   creat_file(temp);
-
+  strcat(temp, "/");
+  strcat(temp, childD);
   int getIno=kcwgetino(dev, temp);
   MINODE *mip=kcwiget(dev, getIno);
 
