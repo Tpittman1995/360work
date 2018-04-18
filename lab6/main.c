@@ -751,9 +751,8 @@ try_symlink(char* source, char* dest){
 
   mip->INODE.i_mode = 0xA1A4;
   mip->INODE.i_size = strlen(source);
-  get_block(dev, (mip->INODE).i_block[0], buf);
-  strcpy(buf, source);
-  put_block(dev, (mip->INODE).i_block[0], buf);
+  strcpy((mip->INODE).i_block, source);
+
 
   iput(mip);
 
