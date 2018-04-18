@@ -592,14 +592,16 @@ int creat_file(char* path){
 
   if (flag){
     parentInodeNumber=kcwsearch(running->cwd, ".");
-    parentInode = iget(dev, parentInodeNumber);
+    parentInode = kcwiget(dev, parentInodeNumber);
   }else{
-  parentInodeNumber=getino(dev, path);
-  parentInode = iget(dev, parentInodeNumber);
+  printf("PATH=%s\n", path);
+  parentInodeNumber=kcwgetino(dev, path);
+  printf("Pin=%d\n", parentInodeNumber);
+  parentInode = kcwiget(dev, parentInodeNumber);
   }
 
   tempip = &(parentInode->INODE);
-
+  printf("Mode=%x Inode=%d Parent=%s\n", tempip->i_mode, parentInode->ino, path);
   //check for dir
   if ((tempip->i_mode & 0xF000) != 0x4000){
     printf("[ERROR] Parent Dir is Not a Dir.\n");
