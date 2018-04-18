@@ -131,6 +131,7 @@ int getino(int dev, char *pathename)
 }
 #include "util.c"
 #include "rmdir.c"
+#include "unlink.c"
 /*
 #include "ls_cd_pwd.c"
 */
@@ -732,7 +733,7 @@ main(int argc, char *argv[ ])
   //printf("hit a key to continue : "); getchar();
   while(1){
     pwdBuf[0] = 0;
-    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|link|quit] ");
+    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|link|unlink|quit] ");
     fgets(line, 128, stdin);
 
     line[strlen(line)-1] = 0;
@@ -758,6 +759,14 @@ main(int argc, char *argv[ ])
     if (!strcmp(cmd, "mkdir")) my_mkdir(pathname);
     if (!strcmp(cmd, "creat")) creat_file(pathname);
     if (!strcmp(cmd, "link")) try_link(pathname, pathname1);
+    if(!strcmp(cmd, "unlink"))
+    {
+      unlink(pathname);
+    }
+    if(!strcmp(cmd, "unlink"))
+    {
+      readlink(pathname);
+    }
     if(!strcmp(cmd, "rmdir"))
     {
       my_rmdir(pathname);

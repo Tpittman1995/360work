@@ -56,11 +56,13 @@ void unlink(char * path)
 
   	printf("before ifs\n");
 
+
   	if(mip->INODE.i_links_count == 0)
   	{
   		truncate(&(mip->INODE));
   		idealloc(mip->dev, mip);
   	}
+
 
 	if(path[0] == '/' && n == 1)
 	{
