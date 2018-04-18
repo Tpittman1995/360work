@@ -620,8 +620,63 @@ int creat_file(char* path){
 }
 
 try_link(char* source, char* dest){
-  printf("%s %s\n", source, dest);
+  char *s=NULL;
 
+  //check if empty
+  if (source[0]=='\0'||dest[0]=='\0'){
+    printf("[ERROR] usaged: link <path> <path>\n");
+    return 0;
+  }
+
+  int sizeOfparent=0,i=0;
+  char parentD[64], childD[64];
+
+  tokenize(dest);
+
+  for(i=0;i<(n-1);i++) sizeOfparent+=(strlen(name[i])+1);
+  dest[sizeOfparent]=0;
+  strcpy(childD, name[i++]);
+
+  printf("Parentdest=%s childdest=%s\n", dest, childD);
+
+  //get source ino
+  int getSourceIno=kcwgetino(dev,source);
+  if (getSourceIno==0){
+    printf("[ERROR] Source doesn't exist.\n");
+    return 0;
+  }
+  printf("Found sourceINO=%d\n", getSourceIno);
+
+  MINODE *sourceMino=iget(dev, getSourceIno);
+
+  printf("Source Inode Mode:%x\n", (sourceMino->INODE).i_mode);
+  //check for dir
+  if ((sourceMino->INODE).i_mode & 0xF000 == 0x4000){
+    printf("[ERROR] Source is a Dir.\n");
+    return 0;
+  }
+
+  int getDestParentIno=kcwgetino(dev, dest);
+  if (getDestParentIno==0){
+    printf("[ERROR] Dest parent doesn't exist.\n");
+    return 0;
+  }
+
+  MINODE *destParMInode=iget(dev, getDestParentIno);
+
+  printf("Dest Parent Inode:%d\n", destParMInode->ino);
+
+  int destChildIno=kcwsearch(destParMInode, childD);
+  if (destChildIno!=0){
+    printf("[ERROR] Dest child %s already exist.\n", childD);
+  }
+
+  printf("Passed all checks for link!\n");
+
+
+  (sourceMino->INODE).i_links_count++;
+  enter_name(destParMInode, getSourceIno, childD);
+  iput(sourceMino);
 }
 
 
