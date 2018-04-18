@@ -620,8 +620,6 @@ int creat_file(char* path){
 }
 
 try_link(char* source, char* dest){
-  char *s=NULL;
-
   //check if empty
   if (source[0]=='\0'||dest[0]=='\0'){
     printf("[ERROR] usaged: link <path> <path>\n");
@@ -629,7 +627,7 @@ try_link(char* source, char* dest){
   }
 
   int sizeOfparent=0,i=0;
-  char parentD[64], childD[64];
+  char childD[64];
 
   tokenize(dest);
 
@@ -677,6 +675,84 @@ try_link(char* source, char* dest){
   (sourceMino->INODE).i_links_count++;
   enter_name(destParMInode, getSourceIno, childD);
   iput(sourceMino);
+}
+
+try_symlink(char* source, char* dest){
+  //check if empty
+  if (source[0]=='\0'||dest[0]=='\0'){
+    printf("[ERROR] usaged: symlink <path> <path>\n");
+    return 0;
+  }
+
+  int sizeOfparent=0,i=0;
+  char childD[64];
+
+  tokenize(dest);
+
+  for(i=0;i<(n-1);i++) sizeOfparent+=(strlen(name[i])+1);
+  dest[sizeOfparent]=0;
+  strcpy(childD, name[i++]);
+
+  printf("Parentdest=%s childdest=%s\n", dest, childD);
+
+  //get source ino
+  int getSourceIno=kcwgetino(dev,source);
+  if (getSourceIno==0){
+    printf("[ERROR] Source doesn't exist.\n");
+    return 0;
+  }
+  printf("Found sourceINO=%d\n", getSourceIno);
+
+  MINODE *sourceMino=iget(dev, getSourceIno);
+
+  printf("Source Inode Mode:%x\n", (sourceMino->INODE).i_mode);
+  //check for dir
+  if ((sourceMino->INODE).i_mode & 0xF000 == 0x4000){
+    printf("[ERROR] Source is a Dir.\n");
+    return 0;
+  }
+
+  int getDestParentIno=kcwgetino(dev, dest);
+  if (getDestParentIno==0){
+    printf("[ERROR] Dest parent doesn't exist.\n");
+    return 0;
+  }
+
+  MINODE *destParMInode=iget(dev, getDestParentIno);
+
+  printf("Dest Parent Inode:%d\n", destParMInode->ino);
+
+  int destChildIno=kcwsearch(destParMInode, childD);
+  if (destChildIno!=0){
+    printf("[ERROR] Dest child %s already exist.\n", childD);
+    return 0;
+  }
+
+  printf("Passed all checks for symlink!\n");
+
+  char temp[65];
+  char buf[1024];
+  temp[0]=0;
+  strcat(temp, dest);
+  strcat(temp, "/");
+  strcat(temp, childD);
+
+  printf("Dest=%s\n", temp);
+
+  creat_file(temp);
+
+  int getIno=getino(dev, temp);
+  MINODE *mip=iget(dev, getIno);
+
+  mip->INODE.i_mode = 0xA1A4;
+  mip->INODE.i_size = strlen(source);
+  get_block(dev, (mip->INODE).i_block[0], buf);
+  strcpy(buf, source);
+  put_block(dev, (mip->INODE).i_block[0], buf);
+
+  iput(mip);
+
+
 }
 
 
@@ -732,7 +808,7 @@ main(int argc, char *argv[ ])
   //printf("hit a key to continue : "); getchar();
   while(1){
     pwdBuf[0] = 0;
-    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|link|quit] ");
+    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|link|symlink|quit] ");
     fgets(line, 128, stdin);
 
     line[strlen(line)-1] = 0;
@@ -758,6 +834,8 @@ main(int argc, char *argv[ ])
     if (!strcmp(cmd, "mkdir")) my_mkdir(pathname);
     if (!strcmp(cmd, "creat")) creat_file(pathname);
     if (!strcmp(cmd, "link")) try_link(pathname, pathname1);
+    if (!strcmp(cmd, "symlink")) try_symlink(pathname, pathname1);
+
     if(!strcmp(cmd, "rmdir"))
     {
       my_rmdir(pathname);
