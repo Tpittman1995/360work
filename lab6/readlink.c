@@ -22,7 +22,7 @@ void readlink(char * path)
   	}
     		//get_block(dev, mip->INODE.i_block[i], buff);
 
-    		printf("%s\n", i_block);
+    		printf("%s\n", mip->INODE.i_block);
     	
     	
 }
