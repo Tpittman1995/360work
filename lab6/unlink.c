@@ -8,6 +8,7 @@ extern int bmap, imap;
 
 void truncate(INODE * ip)
 {
+	int i = 0;
 	char sbuf[1024];
 	for (i=0; i<12; i++){ /* search direct blocks only */
       
@@ -31,6 +32,7 @@ void unlink(char * path)
 	tokenize(path);
 	strcpy(child, name[n-1]);
 	int childIno = kcwgetino(dev, path);
+	printf("%d\n", childIno);
 	int pino = 0;
 
 	if(childIno == 0)
@@ -41,6 +43,7 @@ void unlink(char * path)
 	
 	MINODE * mip = kcwiget(dev, childIno);
 
+	printf("%d\n", mip->ino);
 
 	if((mip->INODE.i_mode & 0xF000) == 0x4000){
     	printf("Cannot unlink a DIR\n");
@@ -50,6 +53,8 @@ void unlink(char * path)
   	}
 
   	mip->INODE.i_links_count--;
+
+  	printf("before ifs\n");
 
   	if(mip->INODE.i_links_count == 0)
   	{
@@ -73,12 +78,17 @@ void unlink(char * path)
 	else
 	{
 		//printf("in else\n");
-		pino = kcwsearch(mip, "..");
+		pino = running->cwd->ino;
+		printf("%d\n", pino);
 	}
 
-	MINODE * pip = kcwiget(dev, pino);
+	printf("after ifs\n");
 
+	MINODE * pip = kcwiget(dev, pino);
+	printf("%d\n", mip->refCount);
 	mip->refCount--;
+
+	rm_child(pip, child);
 
 
 }
