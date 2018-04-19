@@ -793,6 +793,9 @@ try_touch(char* path){
 
   printf("New Access Time=%d\n", tempip->i_atime);
 
+  mip->dirty=1;
+  iput(mip);
+
 
 
 
