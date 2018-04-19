@@ -795,13 +795,41 @@ try_touch(char* path){
 
   mip->dirty=1;
   iput(mip);
-
-
-
-
-
 }
 
+try_chmod(char *code, char* pathname){
+  if (pathname[0]==0||code[0]==0){
+    printf("[ERROR] ussage: chmod <option> <pathname>\n");
+    return 0;
+  }
+  printf("chmod()\ncode=%s pathname=%s\n", code, pathname);
+
+  int findINO=kcwgetino(dev, pathname);
+  if (findINO==0){
+    printf("[ERROR] Couldn't find Inode. Make sure file exist.\n");
+    return 0;
+  }
+  printf("Found Inode=%d\n", findINO);
+
+  MINODE *mip=kcwiget(dev, findINO);
+
+  INODE *tempip = &(mip->INODE);
+  //check for dir
+  if ((tempip->i_mode & 0xF000) == 0x4000){
+    printf("[ERROR] Found dir instead of file.\n");
+    return 0;
+  }
+  printf("Mode=%x Inode=%d Path=%s\n", tempip->i_mode, mip->ino, pathname);
+
+  printf("Old mode=%x\n",tempip->i_mode);
+
+  tempip->i_mode = (tempip->i_mode & 0xF000)| strtol(code, NULL, 8);
+
+  printf("New mode=%x\n",tempip->i_mode);
+
+  mip->dirty=1;
+  iput(mip);
+}
 
 main(int argc, char *argv[ ])
 {
@@ -855,7 +883,7 @@ main(int argc, char *argv[ ])
   //printf("hit a key to continue : "); getchar();
   while(1){
     pwdBuf[0] = 0;
-    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|link|unlink|symlink|touch|quit] ");
+    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|link|unlink|symlink|touch|chmod|quit] ");
 
     line[0]=0;
     pathname[0]=0;
@@ -898,6 +926,7 @@ main(int argc, char *argv[ ])
     }
     if (!strcmp(cmd, "symlink")) try_symlink(pathname, pathname1);
     if (!strcmp(cmd, "touch")) try_touch(pathname);
+    if (!strcmp(cmd, "chmod")) try_chmod(pathname, pathname1);
 
     if(!strcmp(cmd, "rmdir"))
     {
