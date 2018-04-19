@@ -325,7 +325,7 @@ int ls_file_new(int inum, char * name)
   //printf("after all prints\n");
   // print time
 
-  timel = localtime(&(ip->i_ctime));
+  timel = localtime(&(ip->i_atime));
   strcpy(ftime, asctime(timel));
   ftime[strlen(ftime) - 1] = 0;
   printf("%s  ", ftime);
