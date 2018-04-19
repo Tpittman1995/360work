@@ -20,15 +20,9 @@ void readlink(char * path)
     	return;
     	//return 0;
   	}
+    		//get_block(dev, mip->INODE.i_block[i], buff);
 
-  	for (int i=0; i<12; i++){ 
-
-    		if (mip->INODE.i_block[i]==0) break;
-
-    		
-    		get_block(dev, mip->INODE.i_block[i], buff);
-
-    		printf("%s\n", buff);
+    		printf("%s\n", mip->INODE.i_block);
     	
-    	}
+    	
 }
