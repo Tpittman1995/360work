@@ -833,6 +833,77 @@ try_symlink(char* source, char* dest){
 
 }
 
+try_touch(char* path){
+  if (path[0]==0){
+    printf("[ERROR] Usage: link <pathname>\n");
+    return 0;
+  }
+
+  printf("touch()\npath=%s\n", path);
+
+  //get
+  int getPathIno=kcwgetino(dev,path);
+  if (getPathIno==0){
+    printf("[ERROR] File doesn't exist.\n");
+  }
+
+  printf("Found Inode=%d\n", getPathIno);
+
+  MINODE *mip=kcwiget(dev, getPathIno);
+
+  INODE *tempip = &(mip->INODE);
+  printf("Mode=%x Inode=%d Path=%s\n", tempip->i_mode, mip->ino, path);
+  //check for dir
+  if ((tempip->i_mode & 0xF000) == 0x4000){
+    printf("[ERROR] Found dir instead of file.\n");
+    return 0;
+  }
+
+  printf("Updating time fields.\n");
+
+  printf("Old Access Time=%d\n", tempip->i_atime);
+
+  tempip->i_atime=time(0L);
+
+  printf("New Access Time=%d\n", tempip->i_atime);
+
+  mip->dirty=1;
+  iput(mip);
+}
+
+try_chmod(char *code, char* pathname){
+  if (pathname[0]==0||code[0]==0){
+    printf("[ERROR] ussage: chmod <option> <pathname>\n");
+    return 0;
+  }
+  printf("chmod()\ncode=%s pathname=%s\n", code, pathname);
+
+  int findINO=kcwgetino(dev, pathname);
+  if (findINO==0){
+    printf("[ERROR] Couldn't find Inode. Make sure file exist.\n");
+    return 0;
+  }
+  printf("Found Inode=%d\n", findINO);
+
+  MINODE *mip=kcwiget(dev, findINO);
+
+  INODE *tempip = &(mip->INODE);
+  //check for dir
+  if ((tempip->i_mode & 0xF000) == 0x4000){
+    printf("[ERROR] Found dir instead of file.\n");
+    return 0;
+  }
+  printf("Mode=%x Inode=%d Path=%s\n", tempip->i_mode, mip->ino, pathname);
+
+  printf("Old mode=%x\n",tempip->i_mode);
+
+  tempip->i_mode = (tempip->i_mode & 0xF000)| strtol(code, NULL, 8);
+
+  printf("New mode=%x\n",tempip->i_mode);
+
+  mip->dirty=1;
+  iput(mip);
+}
 
 main(int argc, char *argv[ ])
 {
@@ -886,8 +957,12 @@ main(int argc, char *argv[ ])
   //printf("hit a key to continue : "); getchar();
   while(1){
     pwdBuf[0] = 0;
-    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|link|unlink|symlink|quit] ");
+    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|link|unlink|symlink|touch|chmod|quit] ");
 
+    line[0]=0;
+    pathname[0]=0;
+    pathname1[0]=0;
+    cmd[0]=0;
     fgets(line, 128, stdin);
 
     line[strlen(line)-1] = 0;
@@ -896,6 +971,8 @@ main(int argc, char *argv[ ])
     if (line[0]==0)
       continue;
     pathname[0] = 0;
+
+
 
     sscanf(line, "%s %s %s", cmd, pathname, pathname1);
     printf("cmd=%s pathname=%s\n", cmd, pathname);
@@ -922,6 +999,8 @@ main(int argc, char *argv[ ])
       printf("%s\n", readlink(pathname));
     }
     if (!strcmp(cmd, "symlink")) try_symlink(pathname, pathname1);
+    if (!strcmp(cmd, "touch")) try_touch(pathname);
+    if (!strcmp(cmd, "chmod")) try_chmod(pathname, pathname1);
 
     if(!strcmp(cmd, "rmdir"))
     {
