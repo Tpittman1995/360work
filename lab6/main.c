@@ -2,12 +2,18 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
+#include <time.h>
+#include <sys/types.h>
 #include <libgen.h>
 #include <sys/stat.h>
 #include <ext2fs/ext2_fs.h> 
 
 #include "type.h"
 
+//struct stat mystat, *stp;
+
+char *t1 = "xwrxwrxwr-------";
+char *t2 = "----------------";
 
 MINODE minode[NMINODE];
 MINODE *root;
@@ -121,7 +127,7 @@ MINODE *iget(int dev, int ino)
 
 int iput(MINODE *mip)
 {
-  printf("iput(%d %d)\n", mip->dev, mip->ino);
+  //printf("iput(%d %d)\n", mip->dev, mip->ino);
   return kcwiput(mip);
 }
 
@@ -280,6 +286,72 @@ void pwd(MINODE * wd)
 }
 
 
+
+int ls_file_new(int inum, char * name)
+{
+  time_t rawtime;
+  struct tm * timel;
+  MINODE * mip = kcwiget(dev, inum);
+  ip = &(mip->INODE);
+  //printf("in new ls\n");
+ // printf("%x\n", ip->i_mode);
+  char ftime[256];
+  char temp[256];
+  char min[256];
+  char sec[256];
+  char hr[256];
+  int i = 0;
+ // printf("before ifs\n");
+  if ((ip->i_mode & 0xF000) == 0x8000)
+     printf("%c",'-');
+  if ((ip->i_mode & 0xF000) == 0x4000)
+  {
+     printf("%c",'d');
+  }
+  if ((ip->i_mode & 0xF000) == 0xA000)
+     printf("%c",'l');
+  //printf("after ifs\n");
+  for (i=8; i >= 0; i--){
+    if (ip->i_mode & (1 << i))
+  printf("%c", t1[i]);
+    else
+  printf("%c", t2[i]);
+  }
+ // printf("after for\n");
+  printf("%4d ",ip->i_links_count);
+  printf("%4d ",ip->i_gid);
+  printf("%4d ",ip->i_uid);
+  printf("%8d ",ip->i_size);
+  //printf("after all prints\n");
+  // print time
+
+  timel = localtime(&(ip->i_ctime));
+  strcpy(ftime, asctime(timel));
+  ftime[strlen(ftime) - 1] = 0;
+  printf("%s  ", ftime);
+  printf("%s", name);
+  //printf("%d\n", localtime(ip->i_ctime));
+  //sprintf(temp, "%d", ip->i_ctime);
+  //strcpy(ftime, temp);
+ // printf("after string copy\n");
+  //ftime[strlen(ftime)-1] = 0;
+ // printf("%s  ",ftime);
+
+  // print name
+ // printf("%s\n", name);  
+
+  // print -> linkname if it's a symbolic file
+  if ((ip->i_mode & 0xF000)== 0xA000){ // YOU FINISH THIS PART
+    printf("->%s\n",ip->i_block);
+     // use readlink() SYSCALL to read the linkname
+     // printf(" -> %s", linkname);
+  }
+  iput(mip);
+  printf("\n");
+}
+
+
+
 void list_file()
 {
 	INODE *tempip;
@@ -306,10 +378,12 @@ void list_file()
     		dp = (DIR *)buff;
 
     	while(cp<buff+1024){
+
     		strncpy(temp, dp->name, dp->name_len);
        		temp[dp->name_len] = 0;
+          ls_file_new(dp->inode, temp);
   
-       		printf("%s\n", dp->name);
+       		//printf("%s\n", dp->name);
 
        		cp += dp->rec_len;
        		dp = (DIR *)cp;
@@ -753,7 +827,7 @@ try_symlink(char* source, char* dest){
   mip->INODE.i_size = strlen(source);
   strcpy((mip->INODE).i_block, source);
 
-
+  mip->dirty = 1;
   iput(mip);
 
 
@@ -845,7 +919,7 @@ main(int argc, char *argv[ ])
     }
     if(!strcmp(cmd, "readlink"))
     {
-      readlink(pathname);
+      printf("%s\n", readlink(pathname));
     }
     if (!strcmp(cmd, "symlink")) try_symlink(pathname, pathname1);
 

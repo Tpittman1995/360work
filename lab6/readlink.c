@@ -7,7 +7,7 @@ extern int bmap, imap;
 
 
 
-void readlink(char * path)
+char * readlink(char * path)
 {
 	printf("lagsohad;lasl\n");
 	char buff[1024];
@@ -22,7 +22,8 @@ void readlink(char * path)
   	}
     		//get_block(dev, mip->INODE.i_block[i], buff);
 
-    		printf("%s\n", mip->INODE.i_block);
+    		//printf("%s\n", mip->INODE.i_block);
+            return mip->INODE.i_block;
     	
     	
 }
