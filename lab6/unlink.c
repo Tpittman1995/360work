@@ -9,7 +9,10 @@ extern int bmap, imap;
 void truncate(INODE * ip)
 {
 	int i = 0;
+	int j = 0;
 	char sbuf[1024];
+	int ibuf[256];
+	int ibuf2[256];
 	for (i=0; i<12; i++){ /* search direct blocks only */
       
         if (ip->i_block[i] == 0){
@@ -21,6 +24,62 @@ void truncate(INODE * ip)
        	}
 
 	}
+
+	if(ip->i_block[12] != 0)
+	{
+		get_block(dev, ip->i_block[12], ibuf);
+	}
+	else
+	{
+		return;
+	}
+    //int *temp = (int *)buf;
+
+	for (i = 0; i < 256; i++) //freeing indirect blocks
+	{
+		if(ibuf[i] == 0)
+		{
+			break;
+		}
+		bdealloc(dev, ibuf[i]);
+		ibuf[i] = 0;
+	}
+
+
+
+	if(ip->i_block[13] != 0)
+	{
+		get_block(dev, ip->i_block[13], ibuf);
+	}
+	else
+	{
+		return;
+	}
+	//get_block(dev, ip->i_block[13], ibuf);
+
+	for(i = 0; i < 256; i++)
+	{
+		if(ibuf[i] == 0)
+		{
+			break;
+		}
+		get_block(dev, ibuf[i], ibuf2);
+		for(j = 0; j < 256; j++)
+		{
+			if(ibuf2[j] == 0)
+			{
+				break;
+			}
+
+			bdealloc(dev, ibuf2[j]);
+			ibuf2[i] = 0;
+		}
+
+	}
+
+
+
+
     
 
 }
@@ -66,22 +125,26 @@ void unlink(char * path)
 
 	if(path[0] == '/' && n == 1)
 	{
+		printf("in first check\n");
 		pino = 2;
 	}
 	else if(path[0] == '/')
 	{
+		printf("in second check\n");
 		//printf("in if\n");
+		strcpy(parent, path);
 		parent[strlen(parent)] = 0;
 		parent[strlen(parent)- strlen(child)] = 0;
 		//ppath[strlen(ppath)- 1] = 0;
 		//printf("%s\n", ppath);
 		pino = kcwgetino(dev, parent);
+		printf("%s\n %d\n", parent, pino);
 	}
 	else
 	{
 		//printf("in else\n");
 		pino = running->cwd->ino;
-		printf("%d\n", pino);
+		//printf("%d\n", pino);
 	}
 
 	printf("after ifs\n");

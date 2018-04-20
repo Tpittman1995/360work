@@ -1,6 +1,7 @@
 /*To Do:
   fix absolute path of unlink/rm
-  
+  fix ls. Problem: if you ls something that doesnt exist it breaks 
+
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -170,7 +171,32 @@ int init()
       p->fd[j] = 0;
   }
 }
+/*
+void print_indirect()
+{
+  int iino = kcwsearch(running->cwd, "bigfile");
+  MINODE * mip = kcwiget(dev, iino);
+  int ibuf[256];
+  int i = 0;
+  INODE * ip = &(mip->INODE);
 
+  get_block(dev, ip->i_block[12], ibuf);
+
+    //int *temp = (int *)buf;
+
+  for (i = 0; i < 256; i++) //freeing indirect blocks
+  {
+    printf("in for\n");
+    if(ibuf[i] == 0)
+    {
+      break;
+    }
+    //bdealloc(dev, ibuf[i]);
+    //ibuf[i] = 0;
+    printf("%d\n", ibuf[i]);
+  }
+}
+*/
 // load root INODE and set root pointer to it
 int mount_root()
 {  
@@ -394,11 +420,16 @@ void list_file()
     	}
     	}
 	}else{
-		printf("HELLOW\n");
+		//printf("HELLOW\n");
 		potato = kcwgetino(dev, pathname);
+    if(potato == 0)
+    {
+      printf("directory does not exist\n");
+      return;
+    }
 		tempMI = iget(dev, potato);
 		tempip = &(tempMI->INODE);
-		printf("HELLo\n");
+		//printf("HELLo\n");
 		printf("%d\n", tempMI->ino);
 		printf("size=%d\n", tempip->i_size);
 		//iget(dev, kcwsearch(wd, ".."));
@@ -962,7 +993,6 @@ main(int argc, char *argv[ ])
   while(1){
     pwdBuf[0] = 0;
     printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|rm|link|unlink|symlink|readlink|touch|chmod|quit] ");
-
     line[0]=0;
     pathname[0]=0;
     pathname1[0]=0;
@@ -980,7 +1010,8 @@ main(int argc, char *argv[ ])
 
     sscanf(line, "%s %s %s", cmd, pathname, pathname1);
     printf("cmd=%s pathname=%s\n", cmd, pathname);
-
+   /* if(!strcmp(cmd, "p"))
+      print_indirect();*/
     if (strcmp(cmd, "ls")==0)
        list_file();
     if (strcmp(cmd, "cd")==0)
