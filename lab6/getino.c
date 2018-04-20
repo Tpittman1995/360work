@@ -38,7 +38,7 @@ MINODE *kcwiget(int dev, int ino)
     mip = &minode[i];
     if (mip->dev == dev && mip->ino == ino){
        mip->refCount++;
-       printf("found [%d %d] at minode[%d]: return its addr\n", dev, ino, i);
+      // printf("found [%d %d] at minode[%d]: return its addr\n", dev, ino, i);
        return mip;
     }
   }
@@ -46,7 +46,7 @@ MINODE *kcwiget(int dev, int ino)
   for (i=0; i<NMINODE; i++){
     mip = &minode[i];
     if (mip->refCount == 0){
-      printf("load INODE=[%d %d] into minode[%d]\n", dev, ino, i);
+      //printf("load INODE=[%d %d] into minode[%d]\n", dev, ino, i);
        mip->refCount = 1;
        mip->dev = dev;
        mip->ino = ino;
