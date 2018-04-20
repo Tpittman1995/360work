@@ -1,3 +1,7 @@
+/*To Do:
+  fix absolute path of unlink/rm
+  
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -883,7 +887,7 @@ main(int argc, char *argv[ ])
   //printf("hit a key to continue : "); getchar();
   while(1){
     pwdBuf[0] = 0;
-    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|link|unlink|symlink|touch|chmod|quit] ");
+    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|rm|link|unlink|symlink|readlink|touch|chmod|quit] ");
 
     line[0]=0;
     pathname[0]=0;
@@ -916,6 +920,7 @@ main(int argc, char *argv[ ])
     if (!strcmp(cmd, "mkdir")) my_mkdir(pathname);
     if (!strcmp(cmd, "creat")) creat_file(pathname);
     if (!strcmp(cmd, "link")) try_link(pathname, pathname1);
+    if (!strcmp(cmd, "rm")) unlink(pathname);
     if(!strcmp(cmd, "unlink"))
     {
       unlink(pathname);
