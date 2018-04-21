@@ -100,6 +100,7 @@ void unlink(char * path)
 		return 0;
 	}
 	
+	printf("%d\n", childIno);
 	MINODE * mip = kcwiget(dev, childIno);
 
 	printf("%d\n", mip->ino);
@@ -134,7 +135,7 @@ void unlink(char * path)
 		//printf("in if\n");
 		strcpy(parent, path);
 		parent[strlen(parent)] = 0;
-		parent[strlen(parent)- strlen(child)] = 0;
+		parent[strlen(parent)- strlen(child)-1] = 0;
 		//ppath[strlen(ppath)- 1] = 0;
 		//printf("%s\n", ppath);
 		pino = kcwgetino(dev, parent);
