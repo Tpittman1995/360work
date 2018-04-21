@@ -143,6 +143,7 @@ int getino(int dev, char *pathename)
 #include "rmdir.c"
 #include "unlink.c"
 #include "readlink.c"
+#include "openTry.c"
 /*
 #include "ls_cd_pwd.c"
 */
@@ -171,7 +172,7 @@ int init()
   }
 }
 
-// load root INODE and set root pointer to it
+// load root INODE ansprintfd set root pointer to it
 int mount_root()
 {  
   printf("mount_root()\n");
@@ -317,9 +318,9 @@ int ls_file_new(int inum, char * name)
   //printf("after ifs\n");
   for (i=8; i >= 0; i--){
     if (ip->i_mode & (1 << i))
-  printf("%c", t1[i]);
+      printf("%c", t1[i]);
     else
-  printf("%c", t2[i]);
+      printf("%c", t2[i]);
   }
  // printf("after for\n");
   printf("%4d ",ip->i_links_count);
@@ -961,7 +962,7 @@ main(int argc, char *argv[ ])
   //printf("hit a key to continue : "); getchar();
   while(1){
     pwdBuf[0] = 0;
-    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|rm|link|unlink|symlink|readlink|touch|chmod|quit] ");
+    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|rm|link|unlink|symlink|readlink|touch|chmod|open|quit] ");
 
     line[0]=0;
     pathname[0]=0;
@@ -995,6 +996,7 @@ main(int argc, char *argv[ ])
     if (!strcmp(cmd, "creat")) creat_file(pathname);
     if (!strcmp(cmd, "link")) try_link(pathname, pathname1);
     if (!strcmp(cmd, "rm")) unlink(pathname);
+    if (!strcmp(cmd, "open")) open_file(pathname, pathname1);
     if(!strcmp(cmd, "unlink"))
     {
       unlink(pathname);
