@@ -173,7 +173,7 @@ int init()
   }
 }
 // load root INODE ansprintfd set root pointer to it
-
+/*
 int lseek(int fd, int position)
 {
   int originalPosition = 0;
@@ -188,7 +188,7 @@ int lseek(int fd, int position)
 
   return originalPosition;
 }
-
+*/
 int pfd()
 {
   char temp[256];
