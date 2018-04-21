@@ -5,8 +5,6 @@ extern PROC *running;
 extern int dev;
 extern int bmap, imap;
 
-
-
 int open_file(char* pathName, char* mode){
 	int i;
 	char *t1 = "xwrxwrxwr-------";
