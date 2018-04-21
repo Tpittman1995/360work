@@ -118,11 +118,14 @@ int open_file(char* pathName, char* mode){
             return(-1);
       }
 
+
+
       //itterate through fd array get the lowest one set it to oft and break
-    for(i=0; i<16; i++){
+    for(i=0; i<NFD; i++){
     	temp=running->fd[i];
     	if (temp==0){
-    		temp=oftp;
+    		running->fd[i]=oftp;
+
     		break;
     	}
     }
@@ -135,8 +138,8 @@ int open_file(char* pathName, char* mode){
     }
 
     mip->dirty=1;
-
     iput(mip);
 
+ 
     return i;
 }
