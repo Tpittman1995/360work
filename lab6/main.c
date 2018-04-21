@@ -1080,6 +1080,7 @@ main(int argc, char *argv[ ])
     if (!strcmp(cmd, "symlink")) try_symlink(pathname, pathname1);
     if (!strcmp(cmd, "touch")) try_touch(pathname);
     if (!strcmp(cmd, "chmod")) try_chmod(pathname, pathname1);
+    if (!strcmp(cmd, "pfd")) pfd();
 
     if(!strcmp(cmd, "rmdir"))
     {
