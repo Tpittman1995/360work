@@ -1,6 +1,6 @@
 /*To Do:
   FIXED:fix absolute path of unlink/rm
-  FIZED:fix ls. Problem: if you ls something that doesnt exist it breaks 
+  FIXED:fix ls. Problem: if you ls something that doesnt exist it breaks 
 
 */
 #include <stdio.h>

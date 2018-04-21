@@ -6,13 +6,17 @@ extern int dev;
 extern int bmap, imap;
 
 
-void truncate(INODE * ip)
+void truncate(MINODE * mip)
 {
+	INODE * ip = &(mip->INODE);
 	int i = 0;
 	int j = 0;
 	char sbuf[1024];
 	int ibuf[256];
 	int ibuf2[256];
+	ip->i_size = 0;
+	ip->i_atime=time(0L);
+	mip->dirty = 1;
 	for (i=0; i<12; i++){ /* search direct blocks only */
       
         if (ip->i_block[i] == 0){
@@ -119,7 +123,7 @@ void unlink(char * path)
 
   	if(mip->INODE.i_links_count == 0)
   	{
-  		truncate(&(mip->INODE));
+  		truncate(mip);
   		idealloc(mip->dev, mip);
   	}
 
