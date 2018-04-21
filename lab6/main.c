@@ -1,6 +1,7 @@
 /*To Do:
-  fix absolute path of unlink/rm
-  
+  FIXED:fix absolute path of unlink/rm
+  FIXED:fix ls. Problem: if you ls something that doesnt exist it breaks 
+
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -171,8 +172,74 @@ int init()
       p->fd[j] = 0;
   }
 }
-
 // load root INODE ansprintfd set root pointer to it
+
+int lseek(int fd, int position)
+{
+  int originalPosition = 0;
+  OFT * oftp = running->fd[fd];
+  if(position < 0 || position >= oftp->mptr->INODE.i_size)
+  {
+    printf("outside of file range\n");
+    return 0;
+  }
+  originalPosition = oftp->offset;
+  oftp->offset = position;
+
+  return originalPosition;
+}
+
+int pfd()
+{
+  char temp[256];
+  int i = 0;
+  printf("fd   mode   offset   INODE\n----  ----   ------  --------\n");
+  while(running->fd[i] || i < 16)
+  {
+    switch(running->fd[i]->mode){
+         case 0 : strcpy(temp, "READ");     // R: offset = 0
+                  break;
+         case 1 : strcpy(temp, "WRITE");        // W: truncate file to 0 size          
+                  break;
+         case 2 : strcpy(temp, "READ/WRITE");     // RW: do NOT truncate file
+                  break;
+         case 3 : strcpy(temp, "APPEND");  // APPEND mode
+                  break;
+         default: printf("invalid mode\n");
+                  return(-1);
+    }
+    printf("%d %4s %4d  [%d, %d]\n", i, temp, running->fd[i]->offset, running->fd[i]->mptr->dev, running->fd[i]->mptr->ino);
+  }
+}
+
+/*
+void print_indirect()
+{
+  int iino = kcwsearch(running->cwd, "bigfile");
+  MINODE * mip = kcwiget(dev, iino);
+  int ibuf[256];
+  int i = 0;
+  INODE * ip = &(mip->INODE);
+
+  get_block(dev, ip->i_block[12], ibuf);
+
+    //int *temp = (int *)buf;
+
+  for (i = 0; i < 256; i++) //freeing indirect blocks
+  {
+    printf("in for\n");
+    if(ibuf[i] == 0)
+    {
+      break;
+    }
+    //bdealloc(dev, ibuf[i]);
+    //ibuf[i] = 0;
+    printf("%d\n", ibuf[i]);
+  }
+}
+*/
+// load root INODE and set root pointer to it
+
 int mount_root()
 {  
   printf("mount_root()\n");
@@ -395,11 +462,16 @@ void list_file()
     	}
     	}
 	}else{
-		printf("HELLOW\n");
+		//printf("HELLOW\n");
 		potato = kcwgetino(dev, pathname);
+    if(potato == 0)
+    {
+      printf("directory does not exist\n");
+      return;
+    }
 		tempMI = iget(dev, potato);
 		tempip = &(tempMI->INODE);
-		printf("HELLo\n");
+		//printf("HELLo\n");
 		printf("%d\n", tempMI->ino);
 		printf("size=%d\n", tempip->i_size);
 		//iget(dev, kcwsearch(wd, ".."));
@@ -963,7 +1035,6 @@ main(int argc, char *argv[ ])
   while(1){
     pwdBuf[0] = 0;
     printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|rm|link|unlink|symlink|readlink|touch|chmod|open|quit] ");
-
     line[0]=0;
     pathname[0]=0;
     pathname1[0]=0;
@@ -981,7 +1052,8 @@ main(int argc, char *argv[ ])
 
     sscanf(line, "%s %s %s", cmd, pathname, pathname1);
     printf("cmd=%s pathname=%s\n", cmd, pathname);
-
+   /* if(!strcmp(cmd, "p"))
+      print_indirect();*/
     if (strcmp(cmd, "ls")==0)
        list_file();
     if (strcmp(cmd, "cd")==0)
