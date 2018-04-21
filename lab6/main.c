@@ -171,6 +171,45 @@ int init()
       p->fd[j] = 0;
   }
 }
+
+int lseek(int fd, int position)
+{
+  int originalPosition = 0;
+  OFT * oftp = running->fd[fd];
+  if(position < 0 || position >= oftp->mptr->INODE.i_size)
+  {
+    printf("outside of file range\n");
+    return 0;
+  }
+  originalPosition = oftp->offset;
+  oftp->offset = position;
+
+  return originalPosition;
+}
+
+int pfd()
+{
+  char temp[256];
+  int i = 0;
+  printf("fd   mode   offset   INODE\n----  ----   ------  --------\n");
+  while(running->fd[i] || i < 16)
+  {
+    switch(running->fd[i]->mode){
+         case 0 : strcpy(temp, "READ");     // R: offset = 0
+                  break;
+         case 1 : strcpy(temp, "WRITE");        // W: truncate file to 0 size          
+                  break;
+         case 2 : strcpy(temp, "READ/WRITE");     // RW: do NOT truncate file
+                  break;
+         case 3 : strcpy(temp, "APPEND");  // APPEND mode
+                  break;
+         default: printf("invalid mode\n");
+                  return(-1);
+    }
+    printf("%d %4s %4d  [%d, %d]\n", i, temp, running->fd[i]->offset, running->fd[i]->mptr->dev, running->fd[i]->mptr->ino);
+  }
+}
+
 /*
 void print_indirect()
 {
