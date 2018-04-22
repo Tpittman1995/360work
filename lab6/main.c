@@ -1040,7 +1040,7 @@ main(int argc, char *argv[ ])
   //printf("hit a key to continue : "); getchar();
   while(1){
     pwdBuf[0] = 0;
-    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|rm|link|unlink|symlink|readlink|touch|chmod|open|lseek|close|dup|quit] ");
+    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|rm|link|unlink|symlink|readlink|touch|chmod|open|lseek|close|dup|dup2|quit] ");
     line[0]=0;
     pathname[0]=0;
     pathname1[0]=0;
@@ -1096,6 +1096,7 @@ main(int argc, char *argv[ ])
     if (!strcmp(cmd, "chmod")) try_chmod(pathname, pathname1);
     if (!strcmp(cmd, "pfd")) pfd();
     if (!strcmp(cmd, "dup")) try_dup(pathname);
+    if (!strcmp(cmd, "dup2")) try_dup2(pathname, pathname1);
 
     if(!strcmp(cmd, "rmdir"))
     {
