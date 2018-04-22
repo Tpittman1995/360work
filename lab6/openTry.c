@@ -10,10 +10,17 @@ int open_file(char* pathName, char* mode){
 	char *t1 = "xwrxwrxwr-------";
 	char *t2 = "----------------";
 	int write=0, read=0;
-	char workAround[16];
+	char workAround[16], tempPathName[256];
 	MINODE *tempMInode=NULL;
 	OFT *temp=NULL;
 	workAround[9]=0;
+	int flag=0;
+
+	strcpy(tempPathName, pathName);
+
+	if (pathName[0]=='/') flag=1;
+
+
 	//check for passed in vars
 	if (pathName[0]==0 || mode[0]==0){
 		printf("[ERROR] usage error: open <pathname> <mode>\n");
@@ -24,15 +31,25 @@ int open_file(char* pathName, char* mode){
 
 	//convert mode to integer
 	int modeNum = atoi(mode);
-	int dev=0;
+	int dev=0, ino=0;
+	MINODE *mip = NULL;
 
 	//check for rel or abosulte path
-	if (pathName[0]='/') dev=root->dev;
-	else dev=running->cwd->dev;
+	if (tempPathName[0]='/'){
+		dev = root->dev;
+		ino = kcwgetino(dev, pathName);
+		mip = kcwiget(dev,ino);
+	}
+	else {
+		dev = running->cwd->dev;
+		ino = kcwsearch(running->cwd, tempPathName);
+		mip = kcwgetino(dev, ino);
+
+		printf("INODE=%d\n", ino);
+	}
 
 	//get inode number for the path
-	int ino = kcwgetino(dev, pathName);
-	MINODE *mip = kcwiget(dev,ino);
+	
 
 	//check for file
 	if(((mip->INODE).i_mode & 0xF000)!=0x8000){

@@ -218,7 +218,7 @@ int pfd()
 /*
 void print_indirect()
 {
-  int iino = kcwsearch(running->cwd, "bigfile");
+  int iino = 
   MINODE * mip = kcwiget(dev, iino);
   int ibuf[256];
   int i = 0;
