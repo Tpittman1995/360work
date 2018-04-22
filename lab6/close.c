@@ -18,13 +18,13 @@ int mylseek(int fd, int position)
   	printf("fd does not exist\n");
   	return -1;
   }
-  if(position + oftp->offset < 0 || position + oftp->offset >= oftp->mptr->INODE.i_size)
+  if(position < 0 || position >= oftp->mptr->INODE.i_size)
   {
     printf("outside of file range\n");
     return -1;
   }
   originalPosition = oftp->offset;
-  oftp->offset += position;
+  oftp->offset = position;
 
   return originalPosition;
 }
