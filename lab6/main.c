@@ -196,8 +196,10 @@ int pfd()
   int i = 0;
   printf("fd\tmode\toffset\tINODE\n---\t----\t------\t--------\n");
   //printf("%d\n", running->fd[0]->mptr->ino);
-  while(running->fd[i]!=0 && i < 16)
+  while(i < 16)
   {
+    if(running->fd[i]!=0)
+    {
     //printf("fd[%d]=%d\n", i, running->fd[i]);
     switch(running->fd[i]->mode){
          case 0 : strcpy(temp, "READ");     // R: offset = 0
@@ -212,6 +214,7 @@ int pfd()
                   return(-1);
     }
     printf("%2d\t%4s\t%4d\t[%d, %d]\n", i, temp, running->fd[i]->offset, running->fd[i]->mptr->dev, running->fd[i]->mptr->ino);
+    }
     i++;
   }
 }
