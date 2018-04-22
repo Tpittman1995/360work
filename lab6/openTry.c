@@ -5,6 +5,46 @@ extern PROC *running;
 extern int dev;
 extern int bmap, imap;
 
+int try_dup(char* fd){
+
+	if(fd[0]=='\0'){
+		printf("[ERROR] ussage: dup <fd>\n");
+		return 0;
+	}
+
+	int fdNum = atoi(fd);
+
+	printf("dup()\nTrying to dup=%d\n", fdNum);
+
+	if (fdNum>=0 && fdNum<16);
+	else return 0;
+
+
+	OFT *tempFT = running->fd[fdNum];
+
+	if (tempFT==0){
+		printf("fd[%d] doesn't not exist. Please open file.\n", fdNum);
+		return 0;
+	}
+
+	printf("Found file descriptor.\nfd=%d mode=%d refCount=%d offset=%d\n", fdNum, tempFT->mode, tempFT->refCount, tempFT->offset);
+
+	OFT *newOFT = (OFT *)malloc(sizeof(OFT));
+
+	tempFT->refCount++;
+	newOFT->mode=tempFT->mode;
+	newOFT->refCount=tempFT->refCount;
+	newOFT->offset=tempFT->offset;
+	newOFT->mptr=tempFT->mptr;
+
+	int i=0;
+	for(i=0; i<16; i++)
+		if(running->fd[i]==0) break;
+
+	running->fd[i] = newOFT;
+}
+
+
 int open_file(char* pathName, char* mode){
 	int i;
 	char *t1 = "xwrxwrxwr-------";
