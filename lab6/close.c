@@ -5,8 +5,32 @@ extern PROC *running;
 extern int dev;
 extern int bmap, imap;
 
+int mylseek(int fd, int position)
+{
+	OFT * oftp;
+  int originalPosition = 0;
+  if(running->fd[fd])
+  {
+  	oftp = running->fd[fd];
+  }
+  else
+  {
+  	printf("fd does not exist\n");
+  	return -1;
+  }
+  if(position + oftp->offset < 0 || position + oftp->offset >= oftp->mptr->INODE.i_size)
+  {
+    printf("outside of file range\n");
+    return -1;
+  }
+  originalPosition = oftp->offset;
+  oftp->offset += position;
 
-void close(int fd)
+  return originalPosition;
+}
+
+
+void my_close(int fd)
 {
 	OFT * oftp;
 

@@ -145,6 +145,7 @@ int getino(int dev, char *pathename)
 #include "unlink.c"
 #include "readlink.c"
 #include "openTry.c"
+#include "close.c"
 /*
 #include "ls_cd_pwd.c"
 */
@@ -1039,7 +1040,7 @@ main(int argc, char *argv[ ])
   //printf("hit a key to continue : "); getchar();
   while(1){
     pwdBuf[0] = 0;
-    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|rm|link|unlink|symlink|readlink|touch|chmod|open|quit] ");
+    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|rm|link|unlink|symlink|readlink|touch|chmod|open|lseek|close|quit] ");
     line[0]=0;
     pathname[0]=0;
     pathname1[0]=0;
@@ -1074,6 +1075,14 @@ main(int argc, char *argv[ ])
     if (!strcmp(cmd, "link")) try_link(pathname, pathname1);
     if (!strcmp(cmd, "rm")) unlink(pathname);
     if (!strcmp(cmd, "open")) open_file(pathname, pathname1);
+    if(!strcmp(cmd, "lseek"))
+    {
+      mylseek(atoi(pathname),atoi(pathname1));
+    }
+    if(!strcmp(cmd, "close"))
+    {
+      my_close(atoi(pathname));
+    }
     if(!strcmp(cmd, "unlink"))
     {
       unlink(pathname);
