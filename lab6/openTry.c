@@ -5,6 +5,47 @@ extern PROC *running;
 extern int dev;
 extern int bmap, imap;
 
+int try_dup2(char* fd, char* gd){
+
+	if (fd[0]=='\0' && gd[0]=='\0'){
+		printf("[ERROR] ussage dup2 <fd> <gd>\n");
+		return 0;
+	}
+
+	int fdNum = atoi(fd);
+	int gdNum = atoi(gd);
+
+	printf("dup2()\nTrying to dup fd=%d gd=%d\n", fdNum, gdNum);
+
+	if (fdNum>=0 && fdNum<16)printf("File descriptor in range.\n");
+	else return 0;
+
+	if (gdNum>=0 && gdNum<16)printf("gd in range\n");
+	else return 0;
+
+	OFT *tempFT = running->fd[fdNum];
+	if (tempFT==0){
+		printf("fd[%d] doesn't not exist. Please open file.\n", fdNum);
+		return 0;
+	}
+	printf("Found file descriptor.\nfd=%d mode=%d refCount=%d offset=%d\n", fdNum, tempFT->mode, tempFT->refCount, tempFT->offset);
+
+	close(gdNum);
+
+	OFT *newOFT = (OFT *)malloc(sizeof(OFT));
+
+	tempFT->refCount++;
+	newOFT->mode=tempFT->mode;
+	newOFT->refCount=tempFT->refCount;
+	newOFT->offset=tempFT->offset;
+	newOFT->mptr=tempFT->mptr;
+
+	running->fd[gdNum] = newOFT;
+
+	printf("Finished dup2.\n");
+}
+
+
 int try_dup(char* fd){
 
 	if(fd[0]=='\0'){
@@ -21,12 +62,10 @@ int try_dup(char* fd){
 
 
 	OFT *tempFT = running->fd[fdNum];
-
 	if (tempFT==0){
 		printf("fd[%d] doesn't not exist. Please open file.\n", fdNum);
 		return 0;
 	}
-
 	printf("Found file descriptor.\nfd=%d mode=%d refCount=%d offset=%d\n", fdNum, tempFT->mode, tempFT->refCount, tempFT->offset);
 
 	OFT *newOFT = (OFT *)malloc(sizeof(OFT));
