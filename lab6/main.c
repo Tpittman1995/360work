@@ -148,6 +148,7 @@ int getino(int dev, char *pathename)
 #include "openTry.c"
 #include "close.c"
 #include "read.c"
+#include "trywrite.c"
 /*
 #include "ls_cd_pwd.c"
 */
@@ -1045,7 +1046,7 @@ main(int argc, char *argv[ ])
   //printf("hit a key to continue : "); getchar();
   while(1){
     pwdBuf[0] = 0;
-    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|rm|link|unlink|symlink|readlink|touch|chmod|open|lseek|close|dup|dup2|quit] ");
+    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|rm|link|unlink|symlink|readlink|touch|chmod|open|lseek|close|dup|dup2|write|quit] ");
     line[0]=0;
     pathname[0]=0;
     pathname1[0]=0;
@@ -1106,6 +1107,7 @@ main(int argc, char *argv[ ])
     if (!strcmp(cmd, "pfd")) pfd();
     if (!strcmp(cmd, "dup")) try_dup(pathname);
     if (!strcmp(cmd, "dup2")) try_dup2(pathname, pathname1);
+    if (!strcmp(cmd, "write")) write_file(pathname, pathname1);
 
     if(!strcmp(cmd, "rmdir"))
     {
