@@ -1051,6 +1051,7 @@ main(int argc, char *argv[ ])
     pathname[0]=0;
     pathname1[0]=0;
     cmd[0]=0;
+    //getchar();
     fgets(line, 128, stdin);
 
     line[strlen(line)-1] = 0;
@@ -1084,6 +1085,10 @@ main(int argc, char *argv[ ])
     if(!strcmp(cmd, "read"))
     {
       read_file(atoi(pathname), atoi(pathname1));
+    }
+    if(!strcmp(cmd, "cat"))
+    {
+      myCat(pathname);
     }
     if(!strcmp(cmd, "lseek"))
     {
