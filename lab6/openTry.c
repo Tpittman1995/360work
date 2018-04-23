@@ -103,7 +103,7 @@ int open_file(char* pathName, char* mode){
 	//check for passed in vars
 	if (pathName[0]==0 || mode[0]==0){
 		printf("[ERROR] usage error: open <pathname> <mode>\n");
-		return 0;
+		return -1;
 	}
 	
 	printf("open()\npathname=%s mode=%s\n", pathName, mode);
@@ -133,7 +133,7 @@ int open_file(char* pathName, char* mode){
 	//check for file
 	if(((mip->INODE).i_mode & 0xF000)!=0x8000){
 		printf("[ERROR] Either not a file or don't have proper permissions.\n");
-		return 0;
+		return -1;
 	}
 	printf("Passed all checks.\n");
 
@@ -173,19 +173,19 @@ int open_file(char* pathName, char* mode){
 			//if the fd pointers minode is the same as the one you want to open check what mode is it open in
 			if (temp->mode!=0){
 				printf("[ERROR] File already opened for w/rw/or append mode.\n");
-				return 0;
+				return -1;
 			}
 		}
 	}
 
 	if (modeNum==0 && read==0){
 		printf("[ERROR] Don't have read permissions.\n");
-		return 0;
+		return -1;
 	}
 
 	if (modeNum>=1 && write==0){
 		printf("[ERROR] Don't have write permissions.\n");
-		return 0;
+		return -1;
 	}
 
 	OFT *oftp=(OFT *)malloc(sizeof(OFT));

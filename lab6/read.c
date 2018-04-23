@@ -5,11 +5,12 @@ extern PROC *running;
 extern int dev;
 extern int bmap, imap;
 extern char * readBuf;
+extern char cmd[32];
 
 
 int myread(int fd, int bufSize, int numbytes)
 {
-	printf("in myread\n");
+	printf("\n");
 	char buf[numbytes];
 	free(readBuf);
 	readBuf = (char *)malloc(sizeof(char)*numbytes);
@@ -53,7 +54,7 @@ int myread(int fd, int bufSize, int numbytes)
 		remain = BLKSIZE - startByte;
 		while(remain > 0)
 		{
-			/*
+			
 			if(remain >= numbytes)
 			{
 				if(avil >= numbytes)
@@ -61,6 +62,7 @@ int myread(int fd, int bufSize, int numbytes)
 					//copy numbytes
 					strncpy(cq, cp, numbytes);
 					cp += numbytes;
+					oftp->offset += numbytes;
 					cq += numbytes;
 					count += numbytes;
 					numbytes -= numbytes;
@@ -71,6 +73,7 @@ int myread(int fd, int bufSize, int numbytes)
 				{
 					strncpy(cq, cp, avil);
 					cp += avil;
+					oftp->offset += avil;
 					cq += avil;
 					count += avil;
 					numbytes -= avil;
@@ -86,6 +89,7 @@ int myread(int fd, int bufSize, int numbytes)
 					//copy remain
 					strncpy(cq, cp, remain);
 					cp += remain;
+					oftp->offset += remain;
 					cq += remain;
 					count += remain;
 					numbytes -= remain;
@@ -97,6 +101,7 @@ int myread(int fd, int bufSize, int numbytes)
 					//copy avil
 					strncpy(cq, cp, avil);
 					cp += avil;
+					oftp->offset += avil;
 					cq += avil;
 					count += avil;
 					numbytes -= avil;
@@ -104,7 +109,7 @@ int myread(int fd, int bufSize, int numbytes)
 					remain -= avil;
 				}
 			}
-			*/
+			/*
 			
 			*cq++ = *cp++;
 			oftp->offset++;
@@ -112,7 +117,7 @@ int myread(int fd, int bufSize, int numbytes)
 			avil--;
 			numbytes--;
 			remain--;
-			
+			*/
 			if(numbytes <= 0 || avil <= 0)
 			{
 				break;
@@ -120,9 +125,10 @@ int myread(int fd, int bufSize, int numbytes)
 		}
 	}
 	printf("%d bytes read from fd %d\n",count , fd);
-	buf[strlen(buf)] = 0;
-	printf("%s\n", buf);
+	buf[count] = 0;
+	//printf("%s\n", buf);
 	strcpy(readBuf, buf);
+	//printf("%s\n", readBuf);
 	return count;
 
 }
@@ -130,16 +136,49 @@ int myread(int fd, int bufSize, int numbytes)
 
 int read_file(int fd, int numbytes)
 {
-	printf("before if\n");
+	//printf("before if\n");
 	if(running->fd[fd] == 0)
 	{
 		return -1;
 
 	}
-	printf("after if\n");
+	//printf("after if\n");
 	
+	if(running->fd[fd]->mode == 0 || running->fd[fd] == 2)
+	{
+		return (myread(fd, running->fd[fd]->mptr->INODE.i_size, numbytes));
+	}
+	else
+	{
+		printf("not open for read\n");
+		return -1;
+	}
 
-	return (myread(fd, running->fd[fd]->mptr->INODE.i_size, numbytes));
+
+}
 
 
+void myCat(char * pathName)
+{
+	char mode[2];
+	mode[0] = '0';
+	mode[1] = 0;;
+	int n = 0;
+	int fd = open_file(pathName, mode);
+	if(fd < 0)
+	{
+		printf("error\n");
+		return;
+	}
+	//printf("made it here\n");
+	//getchar();
+	while(n = read_file(fd, running->fd[fd]->mptr->INODE.i_size))
+	{
+		printf("%s", readBuf);
+		//getchar();
+	}
+	printf("\n");
+	//fflush(stdin);
+	my_close(fd);
+	//cmd[0] = 0;
 }
