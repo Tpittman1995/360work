@@ -29,6 +29,7 @@ MNTABLE mntable, *mntPtr;
 SUPER *sp;
 GD    *gp;
 INODE *ip;
+char * readBuf;
 
 int fd, dev;
 int nblocks, ninodes, bmap, imap, iblk;
@@ -146,6 +147,7 @@ int getino(int dev, char *pathename)
 #include "readlink.c"
 #include "openTry.c"
 #include "close.c"
+#include "read.c"
 /*
 #include "ls_cd_pwd.c"
 */
@@ -1078,6 +1080,10 @@ main(int argc, char *argv[ ])
     if (!strcmp(cmd, "link")) try_link(pathname, pathname1);
     if (!strcmp(cmd, "rm")) unlink(pathname);
     if (!strcmp(cmd, "open")) open_file(pathname, pathname1);
+    if(!strcmp(cmd, "read"))
+    {
+      read_file(pathname, pathname1);
+    }
     if(!strcmp(cmd, "lseek"))
     {
       mylseek(atoi(pathname),atoi(pathname1));
