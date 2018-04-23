@@ -1082,7 +1082,7 @@ main(int argc, char *argv[ ])
     if (!strcmp(cmd, "open")) open_file(pathname, pathname1);
     if(!strcmp(cmd, "read"))
     {
-      read_file(pathname, pathname1);
+      read_file(atoi(pathname), atoi(pathname1));
     }
     if(!strcmp(cmd, "lseek"))
     {

@@ -9,12 +9,13 @@ extern char * readBuf;
 
 int myread(int fd, int bufSize, int numbytes)
 {
+	printf("in myread\n");
 	char buf[numbytes];
 	free(readBuf);
 	readBuf = (char *)malloc(sizeof(char)*numbytes);
 	char blkbuf[1024];
 	int ibuf[256];
-	int count = 0
+	int count = 0;
 	int lbk;
 	int blk;
 	int remain = 0;
@@ -119,6 +120,7 @@ int myread(int fd, int bufSize, int numbytes)
 		}
 	}
 	printf("%d bytes read from fd %d\n",count , fd);
+	buf[strlen(buf)] = 0;
 	printf("%s\n", buf);
 	strcpy(readBuf, buf);
 	return count;
@@ -128,15 +130,16 @@ int myread(int fd, int bufSize, int numbytes)
 
 int read_file(int fd, int numbytes)
 {
-
-	if(!running->fd[fd])
+	printf("before if\n");
+	if(running->fd[fd] == 0)
 	{
 		return -1;
 
 	}
+	printf("after if\n");
 	
 
-	return myread(fd, running->fd[fd]->mptr->INODE.i_size, numbytes);
+	return (myread(fd, running->fd[fd]->mptr->INODE.i_size, numbytes));
 
 
 }
