@@ -83,7 +83,7 @@ kcwiput(MINODE *mip)
  if (!mip->dirty)       return;
  
  /* write back */
- printf("KCWiput: dev=%d ino=%d\n", mip->dev, mip->ino); 
+ //printf("KCWiput: dev=%d ino=%d\n", mip->dev, mip->ino); 
 
  block =  ((mip->ino - 1) / 8) + iblk;
  offset =  (mip->ino - 1) % 8;
