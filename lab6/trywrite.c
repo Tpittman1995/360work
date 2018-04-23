@@ -15,7 +15,7 @@ int try_write(int fd, char* buf, int nbytes){
 	MINODE *mip = currentPROC->mptr;
 	INODE *ip = &(mip->INODE);
 
-	printf("fd=%d offset=%d INODE=%d\n", fd, offsetFD, mip->ino);
+	printf("fd=%d offset=%d INODE=%d buffertowrite=%s\n", fd, offsetFD, mip->ino, buf);
 
 	while (nbytes > 0){//while I still have to more stuff to copy
 		lblk = offsetFD/1024;
@@ -70,19 +70,42 @@ int try_write(int fd, char* buf, int nbytes){
      	int remain = BLKSIZE - startByte;
      	char *cq = buf;
 
+
+
+
+
      	while (remain>0){
-     		*cp++ = *cq++;
-     		nbytes--; remain--;
-     		currentPROC->offset++;
-     		if (currentPROC->offset > ip->i_size)  // especially for RW|APPEND mode
-               ip->i_size++;    // inc file size (if offset > fileSize)
-           	if (nbytes <= 0) break;
+
+     		if (nbytes<=remain){//buff is smaller than or equal block
+     			strcpy(cp, cq);
+     			remain-=nbytes;
+     			currentPROC->offset+=nbytes;
+     			if (currentPROC->offset > ip->i_size)  // especially for RW|APPEND mode
+     				ip->i_size+=nbytes; 
+     			nbytes=0;
+     			break; 
+     		}else{//buff is smaller than the block
+     			strncpy(cp, cq, remain);
+     			cq+=remain;
+     			nbytes-=remain;
+     			currentPROC->offset+=remain;
+     			if (currentPROC->offset > ip->i_size)  // especially for RW|APPEND mode
+     				ip->i_size+=remain; 
+     			remain=0;
+     		}
+
+
+     		// *cp++ = *cq++;
+     		// nbytes--; remain--;
+     		// currentPROC->offset++;
+     		// if (currentPROC->offset > ip->i_size)  // especially for RW|APPEND mode
+       //         ip->i_size++;    // inc file size (if offset > fileSize)
+       //     	if (nbytes <= 0) break;
 
      	}
      	put_block(mip->dev, blk, cbuff);
 	}
-	mip->dirty = 1;       // mark mip dirty for iput() 
-	printf("wrote %d char into file descriptor fd=%d\n", nbytes, fd);           
+	mip->dirty = 1;       // mark mip dirty for iput()            
 	return nbytes;
 }
 
@@ -117,5 +140,5 @@ int write_file(char* fd1, char* writeThis){
 
 	printf("Length of String=%d\n", getLen);
 
-	return (try_write(fd, localBuffer, getLen));
+	return (try_write(fd, writeThis, getLen));
 }
