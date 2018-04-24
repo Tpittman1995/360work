@@ -149,6 +149,7 @@ int getino(int dev, char *pathename)
 #include "close.c"
 #include "read.c"
 #include "trywrite.c"
+#include "try_mount.c"
 /*
 #include "ls_cd_pwd.c"
 */
@@ -1118,6 +1119,7 @@ main(int argc, char *argv[ ])
     if (!strcmp(cmd, "write")) write_file(pathname, pathname1);
     if (!strcmp(cmd, "cp")) try_cp(pathname, pathname1);
     if (!strcmp(cmd, "mv")) try_move(pathname, pathname1);
+    if (!strcmp(cmd, "mount")) try_mount(pathname, pathname1);
 
 
     if(!strcmp(cmd, "rmdir"))
