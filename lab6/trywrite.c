@@ -6,6 +6,40 @@ extern int dev;
 extern int bmap, imap;
 extern char *readBuf;
 
+int try_move(char* source, char* dest){
+
+	if (source[0]==0 || dest[0]==0){
+		printf("[ERROR] ussage mv <source> <dest>\n");
+		return -1;
+	}
+
+	//get the ino and put it in memory INODE
+	int sourceIno = kcwgetino(running->cwd->dev, source);
+	if (sourceIno==0){
+		printf("[ERROR] Couldn't find source INODE.\n");
+		return -1;
+	}
+	MINODE *sourceMINODE = kcwiget(running->cwd->dev, sourceIno);
+
+	int destIno = kcwgetino(running->cwd->dev, dest);
+	if (destIno!=0){
+		printf("[ERROR] Destination already exist.\n");
+		return -1;
+	}
+
+	printf("Passed Check.\n");
+
+	int check=1;
+
+	if (check){
+		try_link(source, dest);
+		unlink(source);
+	}else{
+		try_cp(source, dest);
+		unlink(source);
+	}
+}
+
 int try_cp(char* source, char* dest){
 
 	if (source[0]==0 || dest[0]==0){
