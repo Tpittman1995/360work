@@ -1113,6 +1113,8 @@ main(int argc, char *argv[ ])
     if (!strcmp(cmd, "dup")) try_dup(pathname);
     if (!strcmp(cmd, "dup2")) try_dup2(pathname, pathname1);
     if (!strcmp(cmd, "write")) write_file(pathname, pathname1);
+    if (!strcmp(cmd, "cp")) try_cp(pathname, pathname1);
+
 
     if(!strcmp(cmd, "rmdir"))
     {

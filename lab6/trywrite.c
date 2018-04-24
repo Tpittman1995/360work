@@ -4,6 +4,60 @@ extern int  n;            // number of token strings
 extern PROC *running;
 extern int dev;
 extern int bmap, imap;
+extern char *readBuf;
+
+int try_cp(char* source, char* dest){
+
+	if (source[0]==0 || dest[0]==0){
+		printf("[ERROR] ussage cp <source> <dest>\n");
+		return -1;
+	}
+
+	int fd = open_file(source, "0");
+	int gd = open_file(dest, "1");
+	printf("fd=%d\n", fd);
+	printf("gd=%d\n", gd);
+
+	if (fd<0){
+		printf("[ERROR] Source doesn't exist\n");
+		return -1;
+	}
+
+	if (gd<0){
+		creat_file(dest);
+		gd = open(dest, "1");
+	}
+
+	if (gd<0){
+		printf("[ERROR] Something seriously wrong burn computer.\n");
+		return -100;
+	}
+
+	printf("fd=%d\n", fd);
+	printf("gd=%d\n", gd);
+
+	char tempGD[256];
+	printf("IKNOW\n");
+	printf("gd=%d\n", gd);
+	sprintf(tempGD, "%d", gd);
+	printf("UKNOW\n");
+	printf("gd=%s\n", tempGD);
+
+
+	int n = 0;
+	while( n=read_file(fd, running->fd[fd]->mptr->INODE.i_size) ){
+       write_file(tempGD, readBuf);  // notice the n in write()
+   }
+
+   printf("Finished writing.\n");
+
+   my_close(fd);
+   my_close(gd);
+
+
+
+}
+
 
 int try_write(int fd, char* buf, int nbytes){
 

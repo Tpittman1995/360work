@@ -163,7 +163,8 @@ int open_file(char* pathName, char* mode){
 		temp=running->fd[i];
 
 		//check if struct is not empty
-		if (temp==0) break;
+		if (temp==0) continue;
+		else{
 
 		//get MINODE
 		tempMInode=temp->mptr;
@@ -175,7 +176,16 @@ int open_file(char* pathName, char* mode){
 				printf("[ERROR] File already opened for w/rw/or append mode.\n");
 				return -1;
 			}
+			if (modeNum==0 && temp->mode!=0){
+				printf("[ERROR] File already opened for read\n");
+				return -1;
+			}
+			if (modeNum>0 && temp->mode>=0){
+				printf("[ERROR] Already opened can't do it.\n");
+				return -1;
+			}
 		}
+	}
 	}
 
 	if (modeNum==0 && read==0){
