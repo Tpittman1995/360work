@@ -8,6 +8,7 @@ extern int bmap, imap;
 
 void truncate(MINODE * mip)
 {
+	printf("Truncating ino = %d!!!!!!!!!!!!!!!!!\n", mip->ino);
 	INODE * ip = &(mip->INODE);
 	int i = 0;
 	int j = 0;

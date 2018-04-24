@@ -825,6 +825,9 @@ try_link(char* source, char* dest){
     return 0;
   }
 
+  if (dest[0]=='\0') getDestParentIno = 2;
+
+
   MINODE *destParMInode=kcwiget(dev, getDestParentIno);
 
   printf("Dest Parent Inode:%d\n", destParMInode->ino);

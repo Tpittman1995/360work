@@ -31,8 +31,10 @@ int try_move(char* source, char* dest){
 
 	int check=1;
 
+	printf("source=%s\n", source);
 	if (check){
 		try_link(source, dest);
+		printf("source=%s\n", source);
 		unlink(source);
 	}else{
 		try_cp(source, dest);
