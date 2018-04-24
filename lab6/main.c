@@ -810,7 +810,7 @@ try_link(char* source, char* dest){
   }
   printf("Found sourceINO=%d\n", getSourceIno);
 
-  MINODE *sourceMino=iget(dev, getSourceIno);
+  MINODE *sourceMino=kcwiget(dev, getSourceIno);
 
   printf("Source Inode Mode:%x\n", (sourceMino->INODE).i_mode);
   //check for dir
@@ -825,7 +825,7 @@ try_link(char* source, char* dest){
     return 0;
   }
 
-  MINODE *destParMInode=iget(dev, getDestParentIno);
+  MINODE *destParMInode=kcwiget(dev, getDestParentIno);
 
   printf("Dest Parent Inode:%d\n", destParMInode->ino);
 
@@ -1114,6 +1114,7 @@ main(int argc, char *argv[ ])
     if (!strcmp(cmd, "dup2")) try_dup2(pathname, pathname1);
     if (!strcmp(cmd, "write")) write_file(pathname, pathname1);
     if (!strcmp(cmd, "cp")) try_cp(pathname, pathname1);
+    if (!strcmp(cmd, "mv")) try_move(pathname, pathname1);
 
 
     if(!strcmp(cmd, "rmdir"))
