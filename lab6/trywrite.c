@@ -53,21 +53,27 @@ int try_cp(char* source, char* dest){
 	int gd = open_file(dest, "1");
 	printf("fd=%d\n", fd);
 	printf("gd=%d\n", gd);
+	if(fd < 0 || gd < 0)
+	{
+		printf("Files must be closed to copy\n");
+		if(fd >= 0)
+		{
+			my_close(fd);
+		}
+
+		if(gd >= 0)
+		{
+			my_close(gd);
+		}
+		return -1;
+
+	}
 
 	if (fd<0){
 		printf("[ERROR] Source doesn't exist\n");
 		return -1;
 	}
 
-	if (gd<0){
-		creat_file(dest);
-		gd = open(dest, "1");
-	}
-
-	if (gd<0){
-		printf("[ERROR] Something seriously wrong burn computer.\n");
-		return -100;
-	}
 
 	printf("fd=%d\n", fd);
 	printf("gd=%d\n", gd);

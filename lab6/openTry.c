@@ -117,19 +117,47 @@ int open_file(char* pathName, char* mode){
 	if (tempPathName[0]='/'){
 		dev = root->dev;
 		ino = kcwgetino(dev, pathName);
-		mip = kcwiget(dev,ino);
+		if(ino != 0)
+		{
+			mip = kcwiget(dev,ino);
+		}
+		else if(modeNum != 0)
+		{
+			creat_file(pathName);
+			ino = kcwgetino(dev, pathName);
+			mip = kcwiget(dev, ino);
+		}
+		else
+		{
+			printf("[ERROR] File does not exist, Can't open for read\n");
+			return -1;
+		}
 	}
 	else {
 		dev = running->cwd->dev;
-		ino = kcwsearch(running->cwd, tempPathName);
-		mip = kcwgetino(dev, ino);
+		ino = kcwgetino(running->cwd, tempPathName);
+		if(ino != 0)
+		{
+			mip = kcwiget(dev, ino);
+		}
+		else if(modeNum != 0)
+		{
+			creat_file(pathName);
+			ino = kcwgetino(running->cwd, tempPathName);
+			mip = kcwiget(running->cwd->dev, ino);
+		}
+		else
+		{
+			printf("[ERROR] File does not exist, Can't open for read\n");
 
+			return -1;
+		}
 		printf("INODE=%d\n", ino);
 	}
 
 	//get inode number for the path
 	
-
+	
 	//check for file
 	if(((mip->INODE).i_mode & 0xF000)!=0x8000){
 		printf("[ERROR] Either not a file or don't have proper permissions.\n");
