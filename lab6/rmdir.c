@@ -123,7 +123,7 @@ void rm_child(MINODE *pip, char * myname)
 	for (i=0; i<12; i++){ // search direct blocks only
      if (pip->INODE.i_block[i] == 0) 
            return -1;
-     printf("%d %d %d\n", pip->dev, pip->INODE.i_block[i], buf);
+     printf("%d %d\n", pip->dev, pip->INODE.i_block[i]);
      get_block(pip->dev, pip->INODE.i_block[i], buf);
      DIR * dp = (DIR *)buf;
      char * cp = buf;

@@ -123,6 +123,7 @@ void unlink(char * path)
 
   	if(mip->INODE.i_links_count == 0)
   	{
+  		printf("%d\n", mip->ino);
   		truncate(mip);
   		idealloc(mip->dev, mip);
   	}
