@@ -1057,7 +1057,7 @@ main(int argc, char *argv[ ])
   //printf("hit a key to continue : "); getchar();
   while(1){
     pwdBuf[0] = 0;
-    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|rm|link|unlink|symlink|readlink|touch|chmod|open|lseek|close|dup|dup2|write|read|cat|quit] ");
+    printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|rm|link|unlink|symlink|readlink|touch|chmod|open|lseek|close|dup|dup2|write|read|cat|mount|umount|quit] ");
     line[0]=0;
     pathname[0]=0;
     pathname1[0]=0;
