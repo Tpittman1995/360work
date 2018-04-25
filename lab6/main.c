@@ -485,7 +485,7 @@ void list_file()
       printf("directory does not exist\n");
       return;
     }
-		tempMI = iget(dev, potato);
+		tempMI = kcwiget(dev, potato);
 		tempip = &(tempMI->INODE);
 		//printf("HELLo\n");
 		printf("%d\n", tempMI->ino);
@@ -513,6 +513,7 @@ void list_file()
        		dp = (DIR *)cp;
     	}
     	}
+      iput(tempMI);
 	}
 
 }
@@ -655,7 +656,26 @@ int my_mkdir(char* path){
 
   //tokenize path just in case
   tokenize(path);
+  strcpy(child, name[n - 1]);
 
+  if(path[0] == '/' && n == 1)
+  {
+    path[1] = 0;
+  }
+  else if(path[0] == '/')
+  {
+    path[strlen(path)- strlen(child)] = 0;
+  }
+  else if(n == 1)
+  {
+    path[0] = '.';
+    path[1] = 0;
+  }
+  else
+  {
+    path[strlen(path) - strlen(child)] = 0;
+  }
+/*
   //hand ablosute or relative path
   if (path[0]=='/') dev = root->dev;
   else {
@@ -670,12 +690,14 @@ int my_mkdir(char* path){
 
   if (flag){
     parentInodeNumber=kcwsearch(running->cwd, ".");
-    parentInode = iget(dev, parentInodeNumber);
+    parentInode = kcwiget(dev, parentInodeNumber);
   }else{
   parentInodeNumber=getino(dev, path);
-  parentInode = iget(dev, parentInodeNumber);
+  parentInode = kcwiget(dev, parentInodeNumber);
 }
-
+*/
+  parentInodeNumber = kcwgetino(dev, path);
+  parentInode = kcwiget(dev, parentInodeNumber);
   tempip = &(parentInode->INODE);
 
   //check for dir
@@ -691,6 +713,7 @@ int my_mkdir(char* path){
   potato=kcwsearch(tempip, child);
 
   if (potato){
+    iput(parentInode);
     printf("[ERROR] Dir already exist.\n");
     return 0;
   }
