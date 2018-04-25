@@ -7,6 +7,27 @@ extern int bmap, imap;
 extern char *readBuf;
 extern MINODE *root;
 
+int try_umount(char* filesystem){
+	MINODE *mip = kcwiget(running->cwd->dev, 2);
+	MNTABLE *mtable = mip->mptr;
+
+	int i=0;
+	for (i=0; i<6; i++){
+		if(mtable->dev != 0 && !strcmp(mtable->devName, filesystem))
+			break;
+		mtable++;
+	}
+
+	if(i==6){
+		printf("[ERROR] Couldn't find filesystem.\n");
+		return -10;
+	}
+
+	printf("Found filesystem to remove.\n");
+
+
+}
+
 
 int try_mount(char* filesystem, char* mountpoint){
 
