@@ -32,11 +32,34 @@ int try_umount(char* filesystem){
 	printf("Found filesystem to remove.\nfilesystem=%s\n", mtable->devName);
 
 	MINODE *tempMip=NULL;
+	int busyFlag=0;
 	for(int x=0; x<NMINODE; x++){
-		tempMip = 
-		printf("dev=%d\n");
-
+		tempMip = &minode[x];
+		//printf("ino=%d dev=%d\n", tempMip->ino, tempMip->dev);
+		if (tempMip->dev==mtable->dev) busyFlag=1;
 	}
+
+	if (busyFlag){
+		printf("[ERROR] Device is busy.\n");
+		return -1999;
+	}
+
+
+	MINODE *tempMipFinal = mtable->mntDirPtr;
+	MINODE *compare = running->cwd;
+
+	if(tempMipFinal->ino==compare->ino){
+		printf("[ERROR] Deveice is buys.\n");
+		return -1999;
+	}
+
+	tempMipFinal->mounted=0;
+
+	tempMipFinal->dirty=1;
+
+	iput(tempMipFinal);
+
+	return 0;
 
 
 
