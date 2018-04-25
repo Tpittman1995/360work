@@ -195,12 +195,29 @@ int kcwgetino(int ldev, char *pathname)
       }
       kcwiput(mip);
       mip = kcwiget(dev, ino);
-
+      int x = 0;
+      char tempString[256];
       if(mip->ino==2 && mip->dev!=root->dev){
+        //dev = mip->mptr->dev;
+
+        strcpy(tempString, mip->mptr->mntName);
+        printf("pathtoset=%s\n", tempString);
         dev = root->dev;
         kcwiput(mip);
-        mip = kcwiget(dev, 2);
-        ino=2;
+        x = mip->mptr->mntDirPtr->ino;
+        printf("%d\n", x);
+        mip = kcwiget(root->dev, x);
+        x = kcwsearch(mip, "..");
+        printf("%d\n", x);
+
+        //mip = kcwiget(root->dev, x);
+        iput(mip);
+        return x;
+        //x = kcwgetino(dev, tempString);
+        // printf("ino=%d\n", x);
+       // mip = kcwiget(dev, 2);
+        //ino = x;
+        //ino=2;
 
       }else if(mip->mounted == 1)
       {
