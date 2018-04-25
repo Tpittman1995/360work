@@ -81,14 +81,17 @@ int try_mount(char* filesystem, char* mountpoint){
 		// printf("%s %s\n", mntable->devName, filesystem);
 			if(mntable->dev != 0)
 			{
-				printf("dev=%d\n", mntable->dev);
-				printf("ninodes=%d\n", mntable->ninodes);
-				printf("nblocks=%d\n", mntable->nblocks);
-				printf("bmap=%d\n", mntable->bmap);
-				printf("iblk=%d\n", mntable->iblk);
-				printf("nblocks=%d\n", mntable->nblocks);
-				printf("devName[0]=%s\n", (mntable->devName));
-				printf("mntName[0]=%s\n", (mntable->mntName));
+				if(mntable->mntDirPtr->mounted == 1)
+				{
+					printf("dev=%d\n", mntable->dev);
+					printf("ninodes=%d\n", mntable->ninodes);
+					printf("nblocks=%d\n", mntable->nblocks);
+					printf("bmap=%d\n", mntable->bmap);
+					printf("iblk=%d\n", mntable->iblk);
+					printf("nblocks=%d\n", mntable->nblocks);
+					printf("devName[0]=%s\n", (mntable->devName));
+					printf("mntName[0]=%s\n", (mntable->mntName));
+				}
 			}
 			mntable++;
 		}	
