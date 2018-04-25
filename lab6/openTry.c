@@ -135,7 +135,7 @@ int open_file(char* pathName, char* mode){
 	}
 	else {
 		dev = running->cwd->dev;
-		ino = kcwgetino(running->cwd, tempPathName);
+		ino = kcwgetino(running->cwd->dev, pathName);
 		if(ino != 0)
 		{
 			mip = kcwiget(dev, ino);
@@ -143,7 +143,7 @@ int open_file(char* pathName, char* mode){
 		else if(modeNum != 0)
 		{
 			creat_file(pathName);
-			ino = kcwgetino(running->cwd, tempPathName);
+			ino = kcwgetino(running->cwd->dev, pathName);
 			mip = kcwiget(running->cwd->dev, ino);
 		}
 		else
@@ -226,43 +226,77 @@ int open_file(char* pathName, char* mode){
 		return -1;
 	}
 
+
+/*
 	OFT *oftp=(OFT *)malloc(sizeof(OFT));
 	oftp->mode = modeNum;      // mode = 0|1|2|3 for R|W|RW|APPEND 
     oftp->refCount = 1;
     oftp->mptr = mip;  // point at the file's minode[]
+*/
 
     printf("Allocated new OFT Struct.\n");
 
-    switch(modeNum){
-         case 0 : 
-         	oftp->offset = 0;     // R: offset = 0
-            break;
-         case 1 : 
-         	truncate(mip);        // W: truncate file to 0 size
-            oftp->offset = 0;
-            break;
-         case 2 : 
-         	oftp->offset = 0;     // RW: do NOT truncate file
-            break;
-         case 3 : 
-         	oftp->offset =  mip->INODE.i_size;  // APPEND mode
-            break;
-         default: 
-         	printf("invalid mode\n");
-            return(-1);
-      }
+    // switch(modeNum){
+    //      case 0 : 
+    //      	//oftp->offset = 0;     // R: offset = 0
+    //      	running->fd[i]->offset = 0;
+    //         break;
+    //      case 1 : 
+    //      	truncate(mip);        // W: truncate file to 0 size
+    //         //oftp->offset = 0;
+    //         running->fd[i]->offset = 0;
+    //         break;
+    //      case 2 : 
+    //      	//oftp->offset = 0;     // RW: do NOT truncate file
+    //         running->fd[i]->offset = 0;
+    //         break;
+    //      case 3 : 
+    //      	//oftp->offset =  mip->INODE.i_size;  // APPEND mode
+    //         running->fd[i]->offset = mip->INODE.i_size;
+    //         break;
+    //      default: 
+    //      	printf("invalid mode\n");
+    //         return(-1);
+    //   }
 
 
 
       //itterate through fd array get the lowest one set it to oft and break
     for(i=0; i<NFD; i++){
-    	temp=running->fd[i];
-    	if (temp==0){
-    		running->fd[i]=oftp;
+    	//temp=running->fd[i];
+    	if (running->fd[i] == NULL){
+    		//running->fd[i]=oftp;
+    		running->fd[i]=(OFT *)malloc(sizeof(OFT));
+    		running->fd[i]->mode = modeNum;
+    		running->fd[i]->refCount = 1;
+    		running->fd[i]->mptr = mip;
 
     		break;
     	}
     }
+
+    switch(modeNum){
+         case 0 : 
+         	//oftp->offset = 0;     // R: offset = 0
+         	running->fd[i]->offset = 0;
+            break;
+         case 1 : 
+         	truncate(mip);        // W: truncate file to 0 size
+            //oftp->offset = 0;
+            running->fd[i]->offset = 0;
+            break;
+         case 2 : 
+         	//oftp->offset = 0;     // RW: do NOT truncate file
+            running->fd[i]->offset = 0;
+            break;
+         case 3 : 
+         	//oftp->offset =  mip->INODE.i_size;  // APPEND mode
+            running->fd[i]->offset = mip->INODE.i_size;
+            break;
+         default: 
+         	printf("invalid mode\n");
+            return(-1);
+      }
 
 
     if (modeNum==0){

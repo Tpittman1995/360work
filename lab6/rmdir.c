@@ -276,7 +276,7 @@ int my_rmdir(char* path){
     	return;
     	//return 0;
   	}
-  	else if(mip->refCount > 1)
+  	else if(mip->refCount > 2)
   	{
   		printf("%d\n", mip->refCount);
   		printf("Directory is Busy\n");

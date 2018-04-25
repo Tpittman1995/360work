@@ -328,7 +328,7 @@ void change_dir()
   {
     printf("Does not exist\n");
   }
-  printf("refCount = %d\n", temp->refCount);
+ // printf("refCount = %d\n", temp->refCount);
 }
 
 
