@@ -195,6 +195,14 @@ int kcwgetino(int dev, char *pathname)
       }
       kcwiput(mip);
       mip = kcwiget(dev, ino);
+      if(mip->mounted == 1)
+      {
+        printf("changing dev num. was :%d\n", dev);
+        dev = mip->mptr->dev;
+        printf("is now : %d\n", dev);
+      }
    }
+
+
    return ino;
 }
