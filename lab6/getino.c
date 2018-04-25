@@ -182,7 +182,11 @@ int kcwgetino(int ldev, char *pathname)
     mip = kcwiget(dev, 2);
   }
   else
-   spec = mip = kcwiget(running->cwd->dev, running->cwd->ino);
+  {
+  // spec = kcwiget(running->cwd->dev, running->cwd->ino);
+   mip = kcwiget(running->cwd->dev, running->cwd->ino);
+  // spec = kcwiget(running->cwd->dev, running->cwd->ino);
+  }
 
   strcpy(buf, pathname);
   tokenize(buf);
@@ -202,7 +206,9 @@ int kcwgetino(int ldev, char *pathname)
       mip = kcwiget(dev, ino);
       int x = 0;
       char tempString[256];
-      if(kcwsearch(mip, ".")==2 && mip->dev!=root->dev){
+      printf("before if\n");
+      printf("%d\n", running->cwd->ino);
+      if(running->cwd->ino==2 && running->cwd->dev!=root->dev && !strcmp(pathname, "..")){
         //dev = mip->mptr->dev;
 
         strcpy(tempString, mip->mptr->mntName);
