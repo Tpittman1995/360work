@@ -264,7 +264,7 @@ int my_rmdir(char* path){
 	MINODE * pip = kcwiget(dev, pino);
 	//char * name;
 	//MINODE * mip = iget(dev, ino);	
-	mip->refCount--;
+	//mip->refCount--;
 
 	
 	printf("Doing checks...\n");
@@ -275,7 +275,7 @@ int my_rmdir(char* path){
     	return;
     	//return 0;
   	}
-  	else if(mip->refCount > 2)
+  	else if(mip->refCount > 1)
   	{
   		printf("%d\n", mip->refCount);
   		printf("Directory is Busy\n");

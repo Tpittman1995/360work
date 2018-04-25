@@ -203,6 +203,6 @@ int kcwgetino(int dev, char *pathname)
       }
    }
 
-
+   iput(mip);
    return ino;
 }

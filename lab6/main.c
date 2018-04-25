@@ -1,7 +1,7 @@
 /*To Do:
   FIXED:fix absolute path of unlink/rm
   FIXED:fix ls. Problem: if you ls something that doesnt exist it breaks 
-
+  bug: mkdir cant make /a or /b or /anhything
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -309,24 +309,26 @@ void change_dir()
 {
   int nodeChange = 0;
   nodeChange = kcwgetino(dev, pathname);
-
+  MINODE * temp;
   if(nodeChange)
   {
-    MINODE * temp = iget(dev, nodeChange);
+    temp = kcwiget(dev, nodeChange);
     //temp->refCount--;
     if ((temp->INODE.i_mode & 0xF000) != 0x4000){
       printf("not a DIR\n");
-      iput(temp);
+      kcwiput(temp);
       return;
     }
+    running->cwd->refCount--;
     printf("changing directory\n");
     running->cwd = temp;
-    iput(temp);
+    //kcwiput(temp);
   }
   else
   {
     printf("Does not exist\n");
   }
+  printf("refCount = %d\n", temp->refCount);
 }
 
 
