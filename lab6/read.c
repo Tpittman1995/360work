@@ -128,7 +128,7 @@ int myread(int fd, int bufSize, int numbytes)
 	buf[count] = 0;
 	//printf("%s\n", buf);
 	strcpy(readBuf, buf);
-	//printf("%s\n", readBuf);
+	printf("\n%s\n", readBuf);
 	return count;
 
 }
