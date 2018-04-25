@@ -163,7 +163,7 @@ int kcwsearch(MINODE *mip, char *name)
    return(0);
 }
 
-int kcwgetino(int dev, char *pathname)
+int kcwgetino(int ldev, char *pathname)
 {
   int i, ino, blk, disp;
   char buf[BLKSIZE];
@@ -199,6 +199,9 @@ int kcwgetino(int dev, char *pathname)
       {
         printf("changing dev num. was :%d\n", dev);
         dev = mip->mptr->dev;
+        kcwiput(mip);
+        mip = kcwiget(dev, 2);
+        ino = 2;
         printf("is now : %d\n", dev);
       }
    }

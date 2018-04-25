@@ -272,6 +272,7 @@ int my_rmdir(char* path){
 	if ((mip->INODE.i_mode & 0xF000) != 0x4000){
     	printf("not a DIR\n");
     	iput(mip); //(which clears mip->refCount = 0);
+      iput(pip);
     	return;
     	//return 0;
   	}
@@ -280,6 +281,7 @@ int my_rmdir(char* path){
   		printf("%d\n", mip->refCount);
   		printf("Directory is Busy\n");
   		iput(mip); //(which clears mip->refCount = 0);
+      iput(pip);
   		return;
   		//return 0;
   	}
@@ -287,12 +289,14 @@ int my_rmdir(char* path){
   	{
   		printf("Directory is not empty\n");
   		iput(mip); //(which clears mip->refCount = 0);
+      iput(pip);
   		return;
   	}
   	else if(running->uid != 0 && running->uid != mip->INODE.i_uid)
   	{
   		printf("You do not have permission\n");
   		iput(mip); //(which clears mip->refCount = 0); 
+      iput(pip);
   		return;
   	}
   	else
@@ -307,6 +311,7 @@ int my_rmdir(char* path){
          idealloc(mip->dev, mip);
          printf("after idealloc\n");
     	 iput(mip); //(which clears mip->refCount = 0); 
+       iput(pip);
     	 printf("%s\n", child); 
     	 printf("checking\n");
     	 rm_child(pip, child);
