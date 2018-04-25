@@ -631,6 +631,11 @@ int enter_name(MINODE *pip, int myino, char *myname){
 
 
 int my_mkdir(char* path){
+
+  if(path[0]=='\0'){
+    printf("[ERROR] usage mkdir <pathname>\n");
+    return -100;
+  }
   //local vars
   MINODE *parentInode;
   INODE *tempip;
@@ -684,6 +689,8 @@ int my_mkdir(char* path){
     printf("[ERROR] Dir already exist.\n");
     return 0;
   }
+
+  printf("HERER\n");
 
 
   mymkdir(parentInode, child);
@@ -1120,6 +1127,7 @@ main(int argc, char *argv[ ])
     if (!strcmp(cmd, "cp")) try_cp(pathname, pathname1);
     if (!strcmp(cmd, "mv")) try_move(pathname, pathname1);
     if (!strcmp(cmd, "mount")) try_mount(pathname, pathname1);
+    if (!strcmp(cmd, "umount")) try_umount(pathname);
 
 
     if(!strcmp(cmd, "rmdir"))

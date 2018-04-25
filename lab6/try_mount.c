@@ -1,11 +1,47 @@
 extern char gpath[128];   // hold tokenized strings
 extern char *name[64];    // token string pointers
-extern int  n;            // number of token strings 
+extern int  n;
+extern MINODE minode[NMINODE];            // number of token strings 
 extern PROC *running;
 extern int dev;
 extern int bmap, imap;
 extern char *readBuf;
 extern MINODE *root;
+
+int try_umount(char* filesystem){
+	if (filesystem[0]=='\0'){
+		printf("[ERROR] usage umount <filesystem>\n");
+		return -190;
+	}
+
+	MINODE *mip = kcwiget(running->cwd->dev, 2);
+	MNTABLE *mtable = mip->mptr;
+
+	int i=0;
+	for (i=0; i<6; i++){
+		if(mtable->dev != 0 && !strcmp(mtable->devName, filesystem))
+			break;
+		mtable++;
+	}
+
+	if(i==6){
+		printf("[ERROR] Couldn't find filesystem.\n");
+		return -10;
+	}
+
+	printf("Found filesystem to remove.\nfilesystem=%s\n", mtable->devName);
+
+	MINODE *tempMip=NULL;
+	for(int x=0; x<NMINODE; x++){
+		tempMip = 
+		printf("dev=%d\n");
+
+	}
+
+
+
+
+}
 
 
 int try_mount(char* filesystem, char* mountpoint){
