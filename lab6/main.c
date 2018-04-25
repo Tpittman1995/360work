@@ -452,6 +452,7 @@ void list_file()
 
 
 	if (!strcmp(pathname, "\0")){
+    dev = running->cwd->dev;
 		tempip = &((running->cwd)->INODE);
 		printf("size=%d\n", tempip->i_size);
 
@@ -1198,6 +1199,7 @@ main(int argc, char *argv[ ])
 
   //printf("hit a key to continue : "); 
   while(1){
+    dev = running->cwd->dev;
     pwdBuf[0] = 0;
     printf("input command : [ls|cd|pwd|mkdir|creat|rmdir|rm|link|unlink|symlink|readlink|touch|chmod|open|lseek|close|dup|dup2|write|read|cat|mount|umount|quit] ");
     line[0]=0;
