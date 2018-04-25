@@ -180,11 +180,14 @@ int try_mount(char* filesystem, char* mountpoint){
   	mntable->iblk = gp->bg_inode_table;
   	printf("bmp=%d imap=%d iblk = %d\n", mntable->bmap, mntable->imap, mntable->iblk);
 
-  	MINODE * devRoot = kcwiget(ldev, 2);
- 	devRoot->mounted = 1;
-	devRoot->mptr = mntable;
-	mntable->mntDirPtr = devRoot;
-
+  	//MINODE * devRoot = kcwiget(ldev, 2);
+ 	//devRoot->mounted = 1;
+	//devRoot->mptr = mntable;
+	//mntable->mntDirPtr = devRoot;
+  	mmip->mounted = 1;
+  	mmip->mptr = mntable;
+  	mntable->mntDirPtr = mmip;
+  	
 	return 0;
 
 
