@@ -19,7 +19,7 @@ extern int bmap, imap, iblk;
 extern char gpath[128];   // hold tokenized strings
 extern char *name[64];    // token string pointers
 extern int  n;            // number of token strings 
-
+extern MINODE *root;
 /*
 char kcwnames[64][128],*kcwname[64]; 
 int  kcwn;
@@ -195,7 +195,14 @@ int kcwgetino(int ldev, char *pathname)
       }
       kcwiput(mip);
       mip = kcwiget(dev, ino);
-      if(mip->mounted == 1)
+
+      if(mip->ino==2 && mip->dev!=root->dev){
+        dev = root->dev;
+        kcwiput(mip);
+        mip = kcwiget(dev, 2);
+        ino=2;
+
+      }else if(mip->mounted == 1)
       {
         printf("changing dev num. was :%d\n", dev);
         dev = mip->mptr->dev;
@@ -204,6 +211,7 @@ int kcwgetino(int ldev, char *pathname)
         ino = 2;
         printf("is now : %d\n", dev);
       }
+
    }
 
    iput(mip);
