@@ -1062,7 +1062,7 @@ int try_symlink(char* source, char* dest){
   MINODE *mip=kcwiget(dev, getIno);
  // 
   mip->INODE.i_mode = 0xA1A4;
-  
+  //sourceMino->INODE.i_links_count++;
   mip->INODE.i_size = strlen(temp2);
   strcpy((mip->INODE).i_block, temp2);
 
