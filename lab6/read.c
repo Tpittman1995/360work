@@ -174,7 +174,7 @@ void myCat(char * pathName)
 	//getchar();
 	while(n = read_file(fd, running->fd[fd]->mptr->INODE.i_size))
 	{
-		printf("%s", readBuf);
+		//printf("%s", readBuf);
 		//getchar();
 	}
 	printf("\n");
