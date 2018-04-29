@@ -8,7 +8,7 @@ extern int bmap, imap;
 
 void truncate(MINODE * mip)
 {
-	printf("Truncating ino = %d!!!!!!!!!!!!!!!!!\n", mip->ino);
+	//printf("Truncating ino = %d!!!!!!!!!!!!!!!!!\n", mip->ino);
 	INODE * ip = &(mip->INODE);
 	int i = 0;
 	int j = 0;
@@ -18,6 +18,18 @@ void truncate(MINODE * mip)
 	ip->i_size = 0;
 	ip->i_atime=time(0L);
 	mip->dirty = 1;
+
+	if((mip->INODE.i_mode & 0xF000) == 0xA000){
+		printf("erasing symlink\n");
+    	for(i = 0; i < 14; i++)
+    	{
+    		ip->i_block[i] = 0;
+    	}
+    	iput(mip); //(which clears mip->refCount = 0);
+    	return;
+    	//return 0;
+  	}
+
 	for (i=0; i<12; i++){ /* search direct blocks only */
       
         if (ip->i_block[i] == 0){
@@ -119,12 +131,12 @@ void unlink(char * path)
 
   	mip->INODE.i_links_count--;
 
-  	printf("before ifs\n");
+  	//printf("before ifs\n");
 
 
   	if(mip->INODE.i_links_count == 0)
   	{
-  		printf("%d\n", mip->ino);
+  		//printf("%d\n", mip->ino);
   		truncate(mip);
   		idealloc(mip->dev, mip);
   	}
