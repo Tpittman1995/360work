@@ -23,13 +23,25 @@ int try_move(char* source, char* dest){
 
 	int destIno = kcwgetino(running->cwd->dev, dest);
 	if (destIno!=0){
+		iput(sourceMINODE);
 		printf("[ERROR] Destination already exist.\n");
 		return -1;
+	}
+	MINODE * destMINODE = kcwiget(running->cwd->dev, destIno);
+
+	int check=0;
+
+	if(destMINODE->dev == sourceMINODE->dev)
+	{
+		check = 1;
+	}
+	else
+	{
+		check = 0;
 	}
 
 	printf("Passed Check.\n");
 
-	int check=1;
 
 	printf("source=%s\n", source);
 	if (check){
@@ -40,6 +52,8 @@ int try_move(char* source, char* dest){
 		try_cp(source, dest);
 		unlink(source);
 	}
+	iput(destMINODE);
+	iput(sourceMINODE);
 }
 
 int try_cp(char* source, char* dest){
@@ -232,7 +246,7 @@ int write_file(char* fd1, char* writeThis){
 	printf("Passed all Test for Write.\n");
 
 	int getLen=strlen(writeThis);
-	char localBuffer[getLen];
+	//char localBuffer[getLen];
 
 	printf("Length of String=%d\n", getLen);
 

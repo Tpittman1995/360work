@@ -128,7 +128,7 @@ int myread(int fd, int bufSize, int numbytes)
 	buf[count] = 0;
 	//printf("%s\n", buf);
 	strcpy(readBuf, buf);
-	//printf("%s\n", readBuf);
+	printf("\n%s\n", readBuf);
 	return count;
 
 }
@@ -174,7 +174,7 @@ void myCat(char * pathName)
 	//getchar();
 	while(n = read_file(fd, running->fd[fd]->mptr->INODE.i_size))
 	{
-		printf("%s", readBuf);
+		//printf("%s", readBuf);
 		//getchar();
 	}
 	printf("\n");

@@ -1,11 +1,70 @@
 extern char gpath[128];   // hold tokenized strings
 extern char *name[64];    // token string pointers
-extern int  n;            // number of token strings 
+extern int  n;
+extern MINODE minode[NMINODE];            // number of token strings 
 extern PROC *running;
 extern int dev;
 extern int bmap, imap;
 extern char *readBuf;
 extern MINODE *root;
+
+int try_umount(char* filesystem){
+	if (filesystem[0]=='\0'){
+		printf("[ERROR] usage umount <filesystem>\n");
+		return -190;
+	}
+
+	MINODE *mip = kcwiget(running->cwd->dev, 2);
+	MNTABLE *mtable = mip->mptr;
+
+	int i=0;
+	for (i=0; i<6; i++){
+		if(mtable->dev != 0 && !strcmp(mtable->devName, filesystem))
+			break;
+		mtable++;
+	}
+
+	if(i==6){
+		printf("[ERROR] Couldn't find filesystem.\n");
+		return -10;
+	}
+
+	printf("Found filesystem to remove.\nfilesystem=%s\n", mtable->devName);
+
+	MINODE *tempMip=NULL;
+	int busyFlag=0;
+	for(int x=0; x<NMINODE; x++){
+		tempMip = &minode[x];
+		//printf("ino=%d dev=%d\n", tempMip->ino, tempMip->dev);
+		if (tempMip->dev==mtable->dev) busyFlag=1;
+	}
+
+	if (busyFlag){
+		printf("[ERROR] Device is busy.\n");
+		return -1999;
+	}
+
+
+	MINODE *tempMipFinal = mtable->mntDirPtr;
+	MINODE *compare = running->cwd;
+
+	if(tempMipFinal->ino==compare->ino){
+		printf("[ERROR] Deveice is buys.\n");
+		return -1999;
+	}
+
+	tempMipFinal->mounted=0;
+
+	tempMipFinal->dirty=1;
+
+	iput(tempMipFinal);
+
+	return 0;
+
+
+
+
+}
 
 
 int try_mount(char* filesystem, char* mountpoint){
@@ -22,14 +81,17 @@ int try_mount(char* filesystem, char* mountpoint){
 		// printf("%s %s\n", mntable->devName, filesystem);
 			if(mntable->dev != 0)
 			{
-				printf("dev=%d\n", mntable->dev);
-				printf("ninodes=%d\n", mntable->ninodes);
-				printf("nblocks=%d\n", mntable->nblocks);
-				printf("bmap=%d\n", mntable->bmap);
-				printf("iblk=%d\n", mntable->iblk);
-				printf("nblocks=%d\n", mntable->nblocks);
-				printf("devName[0]=%s\n", (mntable->devName));
-				printf("mntName[0]=%s\n", (mntable->mntName));
+				if(mntable->mntDirPtr->mounted == 1)
+				{
+					printf("dev=%d\n", mntable->dev);
+					printf("ninodes=%d\n", mntable->ninodes);
+					printf("nblocks=%d\n", mntable->nblocks);
+					printf("bmap=%d\n", mntable->bmap);
+					printf("iblk=%d\n", mntable->iblk);
+					printf("nblocks=%d\n", mntable->nblocks);
+					printf("devName[0]=%s\n", (mntable->devName));
+					printf("mntName[0]=%s\n", (mntable->mntName));
+				}
 			}
 			mntable++;
 		}	
@@ -145,10 +207,14 @@ int try_mount(char* filesystem, char* mountpoint){
   	printf("bmp=%d imap=%d iblk = %d\n", mntable->bmap, mntable->imap, mntable->iblk);
 
   	MINODE * devRoot = kcwiget(ldev, 2);
- 	devRoot->mounted = 1;
-	devRoot->mptr = mntable;
-	mntable->mntDirPtr = devRoot;
-
+ 	//devRoot->mounted = 1;
+	//devRoot->mptr = mntable;
+	//mntable->mntDirPtr = devRoot;
+  	mmip->mounted = 1;
+  	mmip->mptr = mntable;
+  	mntable->mntDirPtr = mmip;
+  	devRoot->mptr = mntable;
+  	
 	return 0;
 
 
